@@ -31,6 +31,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         }
+
+
+         // Lắng nghe click vào nút 3 chấm
+    document.querySelectorAll('.options-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const menu = btn.nextElementSibling;
+        menu.classList.toggle('show');
+
+        // Ẩn các dropdown khác nếu có
+        document.querySelectorAll('.options-dropdown').forEach(function (otherMenu) {
+          if (otherMenu !== menu) {
+            otherMenu.classList.remove('show');
+          }
+        });
+      });
+    });
+
+    // Ẩn dropdown khi click ra ngoài
+    document.addEventListener('click', function (e) {
+      document.querySelectorAll('.options-dropdown').forEach(function (menu) {
+        if (!menu.parentElement.contains(e.target)) {
+          menu.classList.remove('show');
+        }
+      });
+    });
         
         document.body.addEventListener('click', function(event) {
             if (event.target.matches('.reaction-btn')) {
