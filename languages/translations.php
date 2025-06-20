@@ -62,6 +62,10 @@ $translations = [
         'vi' => 'TIN TỨC',
         'en' => 'NEWS'
     ],
+    '3,3' => [
+        'vi' => 'KIẾN THỨC',
+        'en' => 'KNOWLEDGE'
+    ],
     '4' => [
         'vi' => 'CỘNG ĐỒNG',
         'en' => 'COMMUNITY'
@@ -301,6 +305,14 @@ $translations = [
      'taikhoan-14' => [
         'vi' => 'Bạn có chắc chắn muốn đăng xuất?',
         'en' => 'Are you sure you want to log out?'
+    ],
+    'tintuc-tin-noi-bat' => [
+        'vi' => 'Tin Nổi Bật',
+        'en' => 'Are you sure you want to log out?'
+    ],
+   'tintuc-tin-khac' => [
+        'vi' => 'Các Tin Tức Khác',
+        'en' => 'Other News',
     ],
 ];
 ?>

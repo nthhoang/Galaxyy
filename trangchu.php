@@ -56,6 +56,7 @@ $loggedIn = isset($_SESSION['username']);
     <li class="dropdown">
         <a href="#"><img src="/galaxy/images-icon/black-hole.png" alt=""><?= t('3') ?></a>
         <div class="dropdown-content">
+            <a class="item" href="vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
             <a class="item" href="sukien.php"><img src="/galaxy/images-icon/sukien.png" alt=""><?= t('3,1') ?> </a>
             <a class="item" href="tintuc.php"><img src="/galaxy/images-icon/news.png" alt=""><?= t('3,2') ?> </a>
         </div>
@@ -91,21 +92,6 @@ $loggedIn = isset($_SESSION['username']);
         <?php
             // 1. Xác định đường dẫn đến tệp nội dung dựa trên ngôn ngữ hiện tại
             $content_file = $_SERVER['DOCUMENT_ROOT'] . "/galaxy/content/trangchu_{$current_lang}.html";
-
-            // 2. Kiểm tra tệp có tồn tại không và đọc toàn bộ nội dung của nó
-            if (file_exists($content_file)) {
-                echo file_get_contents($content_file);
-            } else {
-                echo "Nội dung không có sẵn cho ngôn ngữ này.";
-            }
-        ?>
-    </main>
-   
-
-    <main class="sun-content-section">
-        <?php
-            // 1. Xác định đường dẫn đến tệp nội dung dựa trên ngôn ngữ hiện tại
-            $content_file = $_SERVER['DOCUMENT_ROOT'] . "/galaxy/content/footer_{$current_lang}.html";
 
             // 2. Kiểm tra tệp có tồn tại không và đọc toàn bộ nội dung của nó
             if (file_exists($content_file)) {

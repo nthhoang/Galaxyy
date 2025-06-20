@@ -51,7 +51,7 @@
         });
     });
     // === CODE CHO HIỆU ỨNG CUỘN ===
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Chỉ thực hiện khi có các phần tử cần animate
     const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
     if (elementsToAnimate.length === 0) return;

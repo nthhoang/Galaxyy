@@ -49,4 +49,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+
+        // 1. KHỞI TẠO AOS (ANIMATE ON SCROLL)
+    // Hiệu ứng này sẽ kích hoạt cho các phần tử có thuộc tính `data-aos`
+    AOS.init({
+        once: true, // Hiệu ứng chỉ chạy một lần
+        disable: 'mobile' // Tắt hiệu ứng trên điện thoại để tăng hiệu suất
+    });
+
+
+    // 2. KHỞI TẠO SWIPER JS
+    // Chỉ khởi tạo slider nếu phần tử .mySwiper tồn tại trên trang
+    if (document.querySelector('.mySwiper')) {
+        const swiper = new Swiper('.mySwiper', {
+            // Tùy chọn cho slider
+            loop: true, // Lặp vô tận
+            autoplay: {
+                delay: 4000, // Tự động chuyển slide sau 4 giây
+                disableOnInteraction: false, // Không dừng khi người dùng tương tác
+            },
+
+            slidesPerView: 1, // 👈 Chỉ hiện 1 slide
+            spaceBetween: 0, // 👈 Không có khoảng trống giữa slide
+            
+            // Hiển thị các nút điều hướng
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+
+            // Hiển thị dấu chấm phân trang
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+
+            // Hiệu ứng chuyển slide (có thể thử 'fade', 'cube', 'coverflow', 'flip')
+            effect: 'fade', 
+        });
+    }
     });
