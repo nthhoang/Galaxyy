@@ -39,13 +39,14 @@
             
             echo '<div class="comment-container" id="comment-' . $comment['id'] . '">';
                 echo '<div class="comment">';
-                    echo '<img src="'.$comment_avatar.'" class="avatar-sm">';
+                    echo   '<a href="trangcanhan.php?user_id='.$comment['user_id'].'" class="link-trangcanhan">'.'<img src="'.$comment_avatar.'" class="avatar-sm"> </a>';
                     echo '<div class="comment-body">';
+                     echo '<a href="trangcanhan.php?user_id='.$comment['user_id'].'" class="link-trangcanhan">';
                         echo '<p class="mb-0"><strong class="comment-author">'.htmlspecialchars($comment['username']);
                             if ($comment['is_verified']) {
                           echo ' <i class="fas fa-check-circle text-primary" title="Tài khoản đã xác minh"></i>';
                               }
-                           echo '</strong></p>';
+                           echo '</strong></p> </a>';
                         if (!empty($comment['content'])) echo '<p class="mb-0 small text-light">'.nl2br(htmlspecialchars($comment['content'])).'</p>';
                         
                         $stmt_media = $conn->prepare("SELECT file_path, media_type FROM comment_media WHERE comment_id = ?");
@@ -184,13 +185,15 @@
             
             <div class="post">
                 <div class="post-header">
-                    <img src="<?php echo !empty($post['avatar']) ? htmlspecialchars($post['avatar']) : '/galaxy/images-icon/default_avatar.png'; ?>" class="avatar">
+                    <a href="trangcanhan.php?user_id= <?php echo $post['user_id']; ?>" class="link-trangcanhan"> <img src="<?php echo !empty($post['avatar']) ? htmlspecialchars($post['avatar']) : '/galaxy/images-icon/default_avatar.png'; ?>" class="avatar"></a>
                     <div class="author-info">
                         <p class="post-author mb-0">
+                             <a href="trangcanhan.php?user_id=<?php echo $post['user_id']; ?>" class="link-trangcanhan"> 
                           <?php echo htmlspecialchars($post['username']); ?>
                           <?php if ($post['is_verified']): ?>
                             <i class="fas fa-check-circle text-primary" title="Tài khoản đã xác minh"></i>
                             <?php endif; ?>
+                          </a>
                               </p>
                         <p class="post-time mb-0"><?php echo date("H:i, d/m/Y", strtotime($post['created_at'])); ?></p>
                     </div>
@@ -221,7 +224,7 @@
                 <?php if ($loggedIn): ?>
                 <div class="comment-form">
                     <form action="submit_comment.php" method="POST" enctype="multipart/form-data" class="comment-submission-form">
-                        <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
+                        <input type="hidden" name="post_id" value="<?php echo $post_id; ?>"> 
                         <div class="comment-input-area">
                             <textarea name="content" rows="1" placeholder="<?= htmlspecialchars(t('congdong-13')) ?>"></textarea>
                             <label class="file-upload-label" title="Thêm media"><i class="fas fa-paperclip"></i></label>
@@ -253,4 +256,4 @@
     
 <script src="/galaxy/js/post_details.js"></script>
 </body>
-</html>
+</html>  

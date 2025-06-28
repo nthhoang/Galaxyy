@@ -156,4 +156,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+
+    const input = document.getElementById('search-user');
+    const suggestions = document.getElementById('suggestions');
+
+    input.addEventListener('input', function () {
+        const query = input.value.trim();
+        if (query.length === 0) {
+            suggestions.innerHTML = '';
+            return;
+        }
+
+        fetch(`/galaxy/search_user.php?query=` + encodeURIComponent(query))
+            .then(res => res.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item', 'list-group-item-action');
+                        li.textContent = user.username;
+                        li.onclick = () => {
+                            window.location.href = `trangcanhan.php?user_id=${user.id}`;
+                        };
+                        suggestions.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item', 'disabled');
+                    li.textContent = 'Không tìm thấy';
+                    suggestions.appendChild(li);
+                }
+            });
+    });
+
+    // Ẩn gợi ý khi click ngoài
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.innerHTML = '';
+        }
+    });
     });

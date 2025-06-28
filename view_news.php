@@ -1,11 +1,16 @@
 <?php
-session_start();
+   if (session_status() == PHP_SESSION_NONE) { session_start(); }
 // 1. Tích hợp hệ thống dịch
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php';
 require_once 'db.php';
 
 $news_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($news_id === 0) die("Tin tức không hợp lệ.");
+
+// Tăng lượt xem
+$stmt = $conn->prepare("UPDATE news SET views = views + 1 WHERE id = ?");
+$stmt->bind_param("i", $news_id);
+$stmt->execute();
 
 // 2. Xác định các cột ngôn ngữ
 $title_col = ($current_lang == 'en') ? 'title_en' : 'title_vi';
@@ -19,6 +24,25 @@ $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 0) die("Không tìm thấy tin tức.");
 $news = $result->fetch_assoc();
+
+// đưa bình luận vào db
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: /galaxy/TAIKHOAN/login-register.html");
+        exit();
+    }
+
+    $comment_text = trim($_POST['comment']);
+    if (!empty($comment_text)) {
+        $stmt = $conn->prepare("INSERT INTO comments_new (news_id, user_id, comment) VALUES (?, ?, ?)");
+        $stmt->bind_param("iis", $news_id, $_SESSION['user_id'], $comment_text);
+        $stmt->execute();
+        // Sau khi gửi, reload để không gửi lại khi F5
+        header("Location: view_news.php?id=$news_id");
+        exit();
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= $current_lang ?>">
@@ -66,6 +90,53 @@ $news = $result->fetch_assoc();
                     <div class="article-content mt-4">
                         <?php echo $news['full_content']; ?>
                     </div>
+
+                    <hr class="my-5">
+                <section class="comments-section">
+                    <h3><?= t('Bình luận') ?></h3>
+
+                    <!-- Danh sách bình luận -->
+                    <?php
+                     $stmt = $conn->prepare("SELECT c.comment, c.created_at, u.username, u.avatar 
+                        FROM comments_new c 
+                        JOIN users u ON c.user_id = u.id 
+                        WHERE c.news_id = ? 
+                        ORDER BY c.created_at DESC");
+
+                    $stmt->bind_param("i", $news_id);
+                    $stmt->execute();
+                    $comments_result = $stmt->get_result();
+                    while ($comment = $comments_result->fetch_assoc()):
+                    ?>
+                       <div class="media mb-3 p-3 bg-dark rounded">
+                            <img src="<?= htmlspecialchars($comment['avatar'] ?: 'assets/images/default-avatar.jpg') ?>" 
+                                class="mr-3 rounded-circle" 
+                                alt="<?= htmlspecialchars($comment['username']) ?>" 
+                                width="50" height="50" style="object-fit: cover;">
+                            
+                            <div class="media-body">
+                                <h6 class="mt-0 mb-1 text-white"><?= htmlspecialchars($comment['username']) ?></h6>
+                                <small class="text-muted"><?= date('d/m/Y H:i', strtotime($comment['created_at'])) ?></small>
+                                <p class="mt-2"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
+                            </div>
+                        </div>
+
+                    <?php endwhile; ?>
+
+                    <!-- Form bình luận -->
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <form action="" method="POST" class="mt-4">
+                            <div class="form-group">
+                                <label for="comment"><?= t('Nhập bình luận của bạn') ?>:</label>
+                                <textarea name="comment" id="comment" rows="4" class="form-control" required></textarea>
+                            </div>
+                            <button type="submit" name="submit_comment" class="btn btn-primary"><?= t('Gửi bình luận') ?></button>
+                        </form>
+                    <?php else: ?>
+                        <p><a href="/galaxy/TAIKHOAN/login-register.html" class="text-info"><?= t('Đăng nhập để bình luận') ?></a></p>
+                    <?php endif; ?>
+                </section>
+
                 </article>
             </div>
         </div>

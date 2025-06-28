@@ -11,6 +11,7 @@
     $loggedIn = true;
     $current_user_id = $_SESSION['user_id'];
 
+    
     // Lấy avatar của người dùng đang đăng nhập để hiển thị trong form
     $stmt_user_avatar = $conn->prepare("SELECT avatar FROM users WHERE id = ?");
     $stmt_user_avatar->bind_param("i", $current_user_id);
@@ -18,6 +19,18 @@
     $user_result = $stmt_user_avatar->get_result()->fetch_assoc();
     $currentUserAvatar = !empty($user_result['avatar']) ? htmlspecialchars($user_result['avatar']) : '/galaxy/images-icon/default_avatar.png';
     $stmt_user_avatar->close();
+
+    $user_id_post = intval($_GET['user_id']);
+
+    // Nếu không phải chính mình thì tăng view
+    if ($user_id_post !==  $current_user_id) {
+        $stmt_inc_view = $conn->prepare("UPDATE users SET view = view + 1 WHERE id = ?");
+        $stmt_inc_view->bind_param("i", $user_id_post);
+        $stmt_inc_view->execute();
+        $stmt_inc_view->close();
+    }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -94,62 +107,54 @@
 
     <div class="main-body">
         <main class="container mt-4">
+
             <div class="row">
-                  <!-- Cột trái: người nổi bật -->
+                <?php
+                $user_id_post = intval($_GET['user_id']);
+
+                $stmt_user_info = $conn->prepare("SELECT username, fullname, email, phone, birthday, avatar, is_verified 
+                                                FROM users WHERE id = ?");
+                $stmt_user_info->bind_param("i", $user_id_post);
+                $stmt_user_info->execute();
+                $user_info = $stmt_user_info->get_result()->fetch_assoc();
+                $stmt_user_info->close();
+
+                 ?>
+                 <!-- Cột trái: Thông tin người dùng -->
                 <div class="col-md-4">
-                    <div class="card shadow-sm mb-4 sticky-top" style="top: 100px; z-index: 1000;">
-                        <div class="card-header bg-primary text-white"><i class="fas fa-fire"></i> Người nổi bật</div>
-                        <ul class="list-group list-group-flush">
-                        <?php
-                            $stmt_top_users = $conn->query("SELECT id, username, avatar, view FROM users ORDER BY view DESC LIMIT 5");
-                            while ($u = $stmt_top_users->fetch_assoc()) {
-                                $avatar = !empty($u['avatar']) ? htmlspecialchars($u['avatar']) : '/galaxy/images-icon/default_avatar.png';
-                                echo '<li class="list-group-item d-flex align-items-center">';
-                                echo '  <img src="'. $avatar .'" class="rounded-circle me-2" width="40" height="40" alt="Avatar">';
-                                echo '  <div>';
-                                echo '    <a href="trangcanhan.php?user_id=' . $u['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($u['username']) . '</strong></a><br>';
-                                echo '  </div>';
-                                echo '</li>';
-                            }
-                        ?>
+                   <div class="card mb-4 shadow-sm sticky-top" style="top: 100px; z-index: 1000;">
+                        <div class="card-body text-center">
+                            <img src="<?php echo !empty($user_info['avatar']) ? htmlspecialchars($user_info['avatar']) : '/galaxy/images-icon/default_avatar.png'; ?>" 
+                                class="rounded-circle mb-3 border" width="120" height="120" alt="Avatar">
+                            <h4 class="mb-0">
+                                <?php echo htmlspecialchars($user_info['username']); ?>
+                                <?php if ($user_info['is_verified']) echo ' <i class="fas fa-check-circle text-primary" title="Đã xác minh"></i>'; ?>
+                            </h4>
+                            <p class="text-muted mb-2"><?php echo htmlspecialchars($user_info['fullname']); ?></p>
+                        </div>
+                        <ul class="list-group list-group-flush px-3 pb-3">
+                            <li class="list-group-item border-0"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email:</strong> <?php echo htmlspecialchars($user_info['email']); ?></li>
+                            <li class="list-group-item border-0"><i class="fas fa-phone me-2 text-success"></i><strong>Điện thoại:</strong> <?php echo htmlspecialchars($user_info['phone']); ?></li>
+                            <li class="list-group-item border-0"><i class="fas fa-birthday-cake me-2 text-warning"></i><strong>Ngày sinh:</strong> <?php echo date("d/m/Y", strtotime($user_info['birthday'])); ?></li>
                         </ul>
+                        <a href="start_conversation.php?to_user_id=<?= $user_id_post ?>" class="btn btn-primary">Nhắn tin</a>
                     </div>
                 </div>
 
-                
-                <!-- Cột phải: phần đăng bài và post feed -->
+                  <!-- Cột phải: Danh sách bài đăng -->
                 <div class="col-md-8">
-                   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
-                    <div class="position-relative" style="max-width: 400px; margin: 0;">
-                        <input type="text" id="search-user" class="form-control" placeholder="🔍 Tìm người dùng..." autocomplete="off">
-                        <ul id="suggestions" class="list-group position-absolute w-100" style="z-index: 9999;"></ul>
-                    </div>
-                    <a href="message.php" class="btn btn-success"><i class="fas fa-comments"></i> Chat</a>
-                </div>
-                    <div class="post-form-container">
-                        <form action="submit_post.php" method="POST" enctype="multipart/form-data">
-                            <div class="post-form-body">
-                                <a href="trangcanhan.php?user_id=<?= $current_user_id ?>" style="cursor: url('/galaxy/cursor.cur'), auto;"><img src="<?php echo $currentUserAvatar; ?>" alt="Avatar" class="form-avatar"></a>
-                                <textarea name="content" class="form-control stylish-textarea" rows="3" placeholder="<?= t('congdong-1') ?> <?php echo htmlspecialchars($_SESSION['username']); ?>?"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <div class="d-flex justify-content-between">
-                                    <label for="media-upload" class="file-upload-btn"><i class="fas fa-photo-video text-success"></i> <?= t('congdong-2') ?></label>
-                                    <button type="submit" class="btn btn-primary w-50" style=" cursor:  url('/galaxy/cursor.cur'),  auto !important;"><?= t('congdong-3') ?></button>
-                                </div>
-                                <input type="file" id="media-upload" name="media[]" multiple accept="image/*,video/*" style="display: none;">
-                                <div id="preview-container" class="mt-3"></div>
-                            </div>
-                        </form>
-                    </div>
-                    
                     <div class="post-feed">
                         <?php
-                        $sql_posts = "SELECT posts.id, posts.user_id, posts.content, posts.created_at, users.username, users.avatar, users.is_verified
+                            $user_id_post = intval($_GET['user_id']); // Chuyển sang số nguyên để tránh lỗi/lỗ hổng
+                            $stmt_sql_posts = $conn->prepare("SELECT posts.id, posts.user_id, posts.content, posts.created_at, users.username, users.avatar, users.is_verified
                                     FROM posts JOIN users ON posts.user_id = users.id 
-                                    ORDER BY posts.created_at DESC";
-                            $result_posts = $conn->query($sql_posts);
-
+                                    WHERE posts.user_id = ?
+                                    ORDER BY posts.created_at DESC");
+                            $stmt_sql_posts->bind_param("i", $user_id_post);
+                            $stmt_sql_posts->execute();
+                            $result_posts =  $stmt_sql_posts->get_result();
+                            $stmt_sql_posts->close();
+        
                             if ($result_posts && $result_posts->num_rows > 0) {
                                 while($post = $result_posts->fetch_assoc()) {
                                     $post_id = $post['id'];
@@ -251,7 +256,6 @@
             </div>
         </main>
     </div>
-
 <script src="/galaxy/js/congdong.js"></script>
 
 </body>

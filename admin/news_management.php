@@ -5,7 +5,7 @@ include 'header.php';
 $search_term = isset($_GET['search']) ? $_GET['search'] : '';
 // Lấy tiêu đề tiếng Việt để hiển thị trong danh sách
 $sql = "SELECT id, title_vi, category_vi, image_url FROM news";
-if (!empty($search_term)) {
+if (!empty($search_term)) {  
     // Tìm kiếm trên cả hai cột tiêu đề
     $sql .= " WHERE title_vi LIKE ? OR title_en LIKE ?";
     $search_like = "%" . $search_term . "%";
