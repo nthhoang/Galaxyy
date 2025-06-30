@@ -4,7 +4,7 @@ body {
 
 .chat-container {
     display: flex;
-    height: calc(100vh - 56px); /* Chiều cao màn hình trừ đi header (nếu có) */
+    height: 100vh; /* Chiều cao màn hình trừ đi header (nếu có) */
 }
 
 /* --- Cột bên trái (Danh sách cuộc trò chuyện) --- */

@@ -16,7 +16,7 @@ $stmt->bind_result($conv_id);
 if ($stmt->fetch()) {
     $stmt->close();
     header("Location: message.php?conversation_id=$conv_id");
-    exit();
+    exit();  
 }
 $stmt->close();
 

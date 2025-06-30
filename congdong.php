@@ -18,6 +18,8 @@
     $user_result = $stmt_user_avatar->get_result()->fetch_assoc();
     $currentUserAvatar = !empty($user_result['avatar']) ? htmlspecialchars($user_result['avatar']) : '/galaxy/images-icon/default_avatar.png';
     $stmt_user_avatar->close();
+
+
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -145,8 +147,26 @@
                     
                     <div class="post-feed">
                         <?php
+                        // Lấy danh sách user_id của người mình đang theo dõi
+                        $sql = "SELECT followed_id FROM follows WHERE follower_id = ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("i", $current_user_id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        $followed_ids = [];
+                        while ($row = $result->fetch_assoc()) {
+                            $followed_ids[] = $row['followed_id'];
+                        }
+                        $followed_ids[] = $current_user_id; // Bao gồm chính mình
+
+                        // Chuyển danh sách id thành chuỗi
+                        $ids_str = implode(',', $followed_ids);
+
+                        // Lấy bài viết
                         $sql_posts = "SELECT posts.id, posts.user_id, posts.content, posts.created_at, users.username, users.avatar, users.is_verified
                                     FROM posts JOIN users ON posts.user_id = users.id 
+                                    WHERE posts.user_id IN ($ids_str)
                                     ORDER BY posts.created_at DESC";
                             $result_posts = $conn->query($sql_posts);
 

@@ -17,7 +17,7 @@ $stmt = $conn->prepare("
     JOIN users u ON u.id = IF(c.user1_id = ?, c.user2_id, c.user1_id)
     WHERE c.user1_id = ? OR c.user2_id = ?
     ORDER BY c.updated_at DESC
-");
+")  ;
 $stmt->bind_param("iii", $current_user_id, $current_user_id, $current_user_id);
 $stmt->execute();
 $conversations = $stmt->get_result();
@@ -90,7 +90,7 @@ if ($conversation_id) {
     <div class="chat-box">
         <?php if ($conversation_id && $partner): ?>
             <div class="chat-header">
-                <?= htmlspecialchars($partner['username']) ?>
+                <?= htmlspecialchars($partner['username']) ?> 
             </div>
             <div class="messages-area" id="messages-area">
                 <?php while ($msg = $messages->fetch_assoc()): ?>
@@ -124,7 +124,7 @@ if ($conversation_id) {
 
     <?php if ($conversation_id && $partner): ?>
     <div class="sidebar-right">
-        <a href="trangcanhan.php?user_id=<?= $partner['id'] ?>" class="partner-info">
+        <a href="trangcanhan.php?user_id=<?= $partner['id'] ?>" class="partner-info" style="text-decoration: none;">
             <img src="<?= htmlspecialchars($partner['avatar'] ?: 'default_avatar.png') ?>" class="rounded-circle">
             <h5 class="username mt-2"><?= htmlspecialchars($partner['username']) ?></h5>
         </a>
@@ -193,5 +193,88 @@ if ($conversation_id) {
         }
     });
 </script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io("http://localhost:3000"); // nếu deploy, đổi thành domain thực tế
+    const current_user_id = <?= $current_user_id ?>;
+    const partner_id = <?= $partner ? $partner['id'] : 'null' ?>;
+    const conversation_id = <?= $conversation_id ?? 'null' ?>;
+
+    if (current_user_id) {
+        socket.emit("register", current_user_id);
+    }
+
+    const form = document.querySelector('.message-form form');
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const message = this.message.value.trim();
+    const imageFile = this.image.files[0];
+
+    let image_path = null;
+
+    // Nếu có ảnh, upload ảnh trước
+    if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+
+        const uploadRes = await fetch("upload_image.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await uploadRes.json();
+        if (result.success) {
+            image_path = result.image_path;
+        } else {
+            alert("Gửi ảnh thất bại!");
+            return;
+        }
+    }
+
+    // Gửi WebSocket
+    const messageData = {
+        from_user_id: current_user_id,
+        to_user_id: partner_id,
+        conversation_id,
+        message,
+        image_path
+    };
+
+    socket.emit("send_message", messageData);
+
+    // Lưu vào DB
+    fetch("save_message.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(messageData)
+    });
+
+    this.message.value = '';
+    this.image.value = '';
+});
+
+    }
+
+    // Nhận tin nhắn
+    socket.on("receive_message", function(data) {
+        if (data.conversation_id != conversation_id) return;
+
+        const messagesArea = document.getElementById("messages-area");
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message", data.from_user_id == current_user_id ? "sent" : "received");
+        msgDiv.innerHTML = `
+            <div class="message-content">
+                ${data.message ? `<p class="mb-0">${data.message}</p>` : ''}
+                ${data.image_path ? `<img src="${data.image_path}" class="message-image zoomable-image">` : ''}
+            </div>
+        `;
+        messagesArea.appendChild(msgDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    });
+</script>
+
 </body>
 </html>

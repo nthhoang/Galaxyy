@@ -30,7 +30,21 @@
         $stmt_inc_view->close();
     }
 
+    $isFollowing = false;
+    $sql = "SELECT * FROM follows WHERE follower_id = ? AND followed_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $current_user_id, $user_id_post);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) $isFollowing = true;
 
+    // Người theo dõi mình
+    $res = $conn->query("SELECT COUNT(*) AS count FROM follows WHERE followed_id = $user_id_post");
+    $followers = $res->fetch_assoc()['count'];
+
+    // Mình đang theo dõi
+    $res = $conn->query("SELECT COUNT(*) AS count FROM follows WHERE follower_id = $user_id_post");
+    $following = $res->fetch_assoc()['count'];
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -132,12 +146,28 @@
                             </h4>
                             <p class="text-muted mb-2"><?php echo htmlspecialchars($user_info['fullname']); ?></p>
                         </div>
+                        <div style="display: flex; justify-content: center; gap: 10px;">
+                            <p style="font-size: 14px; color: #4682b4;"><?= $followers ?> người theo dõi</p>
+                            <p style="font-size: 14px; color: #2e8b57;">Đang theo dõi <?= $following ?> người</p>
+                        </div>
                         <ul class="list-group list-group-flush px-3 pb-3">
                             <li class="list-group-item border-0"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email:</strong> <?php echo htmlspecialchars($user_info['email']); ?></li>
                             <li class="list-group-item border-0"><i class="fas fa-phone me-2 text-success"></i><strong>Điện thoại:</strong> <?php echo htmlspecialchars($user_info['phone']); ?></li>
                             <li class="list-group-item border-0"><i class="fas fa-birthday-cake me-2 text-warning"></i><strong>Ngày sinh:</strong> <?php echo date("d/m/Y", strtotime($user_info['birthday'])); ?></li>
                         </ul>
-                        <a href="start_conversation.php?to_user_id=<?= $user_id_post ?>" class="btn btn-primary">Nhắn tin</a>
+                        <?php if($current_user_id !== $user_id_post):?>
+                        <div class="d-flex align-items-center justify-content-between" style="width: 100%; gap: 10px;">
+                        <form method="post" action="follow_action.php" style="width: 50%;">
+                            <input type="hidden" name="followed_id" value="<?= $user_id_post ?>">
+                            <?php if ($isFollowing): ?>
+                                <button type="submit" name="action" value="unfollow" class="btn btn-second" style="width: 100%; background-color:cadetblue">Đang theo dõi</button>
+                            <?php else: ?>
+                                <button type="submit" name="action" value="follow" class="btn btn-second" style="width: 100%; background-color:cadetblue;">Theo dõi</button>
+                            <?php endif; ?>
+                        </form>
+                        <a href="start_conversation.php?to_user_id=<?= $user_id_post ?>" class="btn btn-primary" style="width: 50%;">Nhắn tin</a>
+                        </div>
+                         <?php endif; ?>
                     </div>
                 </div>
 
