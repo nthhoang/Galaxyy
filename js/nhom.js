@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch('handle_reaction.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ post_id: postId, reaction_type: reactionType, context: "comunity"})   
+                    body: JSON.stringify({ post_id: postId, reaction_type: reactionType, context: "group"})
                 })
                 .then(response => response.json())
                 .then(data => {

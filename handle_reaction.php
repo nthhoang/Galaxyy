@@ -13,18 +13,33 @@ if (!isset($_SESSION['user_id'])) {
 $input = json_decode(file_get_contents('php://input'), true);
 $post_id = isset($input['post_id']) ? (int)$input['post_id'] : 0;
 $reaction_type = isset($input['reaction_type']) ? $input['reaction_type'] : '';
+$context = $input['context'] ?? null; // Lấy tham số context
 $user_id = $_SESSION['user_id'];
 
-if ($post_id === 0 || empty($reaction_type)) {
+if ($post_id === 0 || empty($reaction_type) || !$context) {
     echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ.']);
     exit();
+}
+
+$tableName = '';
+switch ($context) {
+    case 'comunity':
+        $tableName = 'reactions'; // Tên bảng reaction cho bài đăng ngoài group
+        break;
+    case 'group':
+        $tableName = 'group_reaction'; // Tên bảng reaction cho bài đăng trong group
+        break;
+    default:
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid reaction context.']);
+        exit();
 }
 
 // --- XỬ LÝ DATABASE ---
 $conn->begin_transaction();
 try {
     // 1. Kiểm tra xem người dùng đã thả cảm xúc cho bài này chưa
-    $stmt_check = $conn->prepare("SELECT reaction_type FROM reactions WHERE user_id = ? AND post_id = ?");
+    $stmt_check = $conn->prepare("SELECT reaction_type FROM $tableName WHERE user_id = ? AND post_id = ?");
     $stmt_check->bind_param("ii", $user_id, $post_id);
     $stmt_check->execute();
     $result_check = $stmt_check->get_result();
@@ -33,24 +48,24 @@ try {
         $existing_reaction = $result_check->fetch_assoc();
         if ($existing_reaction['reaction_type'] === $reaction_type) {
             // Giống -> Xóa (bỏ thích)
-            $stmt_delete = $conn->prepare("DELETE FROM reactions WHERE user_id = ? AND post_id = ?");
+            $stmt_delete = $conn->prepare("DELETE FROM $tableName WHERE user_id = ? AND post_id = ?");
             $stmt_delete->bind_param("ii", $user_id, $post_id);
             $stmt_delete->execute();
         } else {
             // Khác -> Cập nhật
-            $stmt_update = $conn->prepare("UPDATE reactions SET reaction_type = ? WHERE user_id = ? AND post_id = ?");
+            $stmt_update = $conn->prepare("UPDATE $tableName SET reaction_type = ? WHERE user_id = ? AND post_id = ?");
             $stmt_update->bind_param("sii", $reaction_type, $user_id, $post_id);
             $stmt_update->execute();
         }
     } else {
         // Chưa có -> Thêm mới
-        $stmt_insert = $conn->prepare("INSERT INTO reactions (user_id, post_id, reaction_type) VALUES (?, ?, ?)");
+        $stmt_insert = $conn->prepare("INSERT INTO $tableName (user_id, post_id, reaction_type) VALUES (?, ?, ?)");
         $stmt_insert->bind_param("iis", $user_id, $post_id, $reaction_type);
         $stmt_insert->execute();
     }
 
     // 2. Đếm lại tổng số cảm xúc cho bài viết
-    $sql_count = "SELECT reaction_type, COUNT(id) as count FROM reactions WHERE post_id = ? GROUP BY reaction_type";
+    $sql_count = "SELECT reaction_type, COUNT(id) as count FROM $tableName WHERE post_id = ? GROUP BY reaction_type";
     $stmt_count = $conn->prepare($sql_count);
     $stmt_count->bind_param("i", $post_id);
     $stmt_count->execute();

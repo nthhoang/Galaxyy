@@ -1,38 +1,35 @@
+<!-- nhom.php -->
 <?php
-    if (session_status() == PHP_SESSION_NONE) { session_start(); }
-    
-    if (!isset($_SESSION['user_id'])) {
-        header("Location: /galaxy/TAIKHOAN/login-register.html");
-        exit();
-    }
-
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php';
+// kiểm tra đăng nhập
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /galaxy/TAIKHOAN/login-register.html");
+    exit();
+}
+  require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php';
     require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
     $loggedIn = true;
     $current_user_id = $_SESSION['user_id'];
 
-    // Lấy avatar của người dùng đang đăng nhập để hiển thị trong form
+        // Lấy avatar của người dùng đang đăng nhập để hiển thị trong form
     $stmt_user_avatar = $conn->prepare("SELECT avatar FROM users WHERE id = ?");
     $stmt_user_avatar->bind_param("i", $current_user_id);
     $stmt_user_avatar->execute();
     $user_result = $stmt_user_avatar->get_result()->fetch_assoc();
     $currentUserAvatar = !empty($user_result['avatar']) ? htmlspecialchars($user_result['avatar']) : '/galaxy/images-icon/default_avatar.png';
     $stmt_user_avatar->close();
-
-
 ?>
+
 <!DOCTYPE html>
-<html lang="<?php echo $current_lang; ?>">
+<html>
 <head>
-    <title>Cộng đồng</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhóm cộng đồng</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/galaxy/css/header.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/congdong.css">
-
 </head>
 <body>
      <header id="head"> 
@@ -93,85 +90,72 @@
             </nav>
         </div>
     </header>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Danh sách nhóm bên trái -->
+        <div class="col-md-4">
+            <h4>Tất cả nhóm</h4>
+            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#modalTaoNhom">+ Tạo nhóm</button>
+            <ul class="list-group">
+                <?php
+                $groups = $conn->query("SELECT * FROM groups ORDER BY created_at DESC");
+                while ($group = $groups->fetch_assoc()) {
+                    echo '<li class="list-group-item">';
+                    echo '<a href="?group_id='.$group['id'].'">'.htmlspecialchars($group['name']).'</a>';
+                    echo '</li>';
+                }
+                ?>
+            </ul>
+        </div>
 
-    <div class="main-body">
-        <main class="container mt-4">
-            <div class="row">
-                  <!-- Cột trái: người nổi bật -->
-                <div class="col-md-4">
-                    <div class="card shadow-sm mb-4 sticky-top" style="top: 100px; z-index: 1000;">
-                        <div class="card-header bg-primary text-white"><i class="fas fa-fire"></i> Người nổi bật</div>
-                        <ul class="list-group list-group-flush">
-                        <?php
-                            $stmt_top_users = $conn->query("SELECT id, username, avatar, view FROM users ORDER BY view DESC LIMIT 5");
-                            while ($u = $stmt_top_users->fetch_assoc()) {
-                                $avatar = !empty($u['avatar']) ? htmlspecialchars($u['avatar']) : '/galaxy/images-icon/default_avatar.png';
-                                echo '<li class="list-group-item d-flex align-items-center">';
-                                echo '  <img src="'. $avatar .'" class="rounded-circle me-2" width="40" height="40" alt="Avatar">';
-                                echo '  <div>';
-                                echo '    <a href="trangcanhan.php?user_id=' . $u['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($u['username']) . '</strong></a><br>';
-                                echo '  </div>';
-                                echo '</li>';
-                            }
-                        ?>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Chi tiết nhóm bên phải -->
+        <div class="col-md-8">
+            <?php if (isset($_GET['group_id'])):
+                $gid = (int)$_GET['group_id'];
+                $stmt = $conn->prepare("SELECT * FROM groups WHERE id = ?");
+                $stmt->bind_param("i", $gid);
+                $stmt->execute();
+                $group = $stmt->get_result()->fetch_assoc();
+                ?>
+                <div class="card">
+                    <?php if (!empty($group['cover_image'])): ?>
+                        <img src="<?= htmlspecialchars($group['cover_image']) ?>" class="card-img-top" alt="Cover">
+                    <?php endif; ?>
+                    <div class="card-body">
+                        <h4><?= htmlspecialchars($group['name']) ?></h4>
+                        <p><?= nl2br(htmlspecialchars($group['description'])) ?></p>
 
-                
-                <!-- Cột phải: phần đăng bài và post feed -->
-                <div class="col-md-8">
-                   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
-                    <div class="position-relative" style="max-width: 400px; margin: 0;">
-                        <input type="text" id="search-user" class="form-control" placeholder="🔍 Tìm người dùng..." autocomplete="off">
-                        <ul id="suggestions" class="list-group position-absolute w-100" style="z-index: 9999;"></ul>
-                    </div>
-                    <div>
-                    <a href="nhom.php" class="btn btn-info"><i class="fas fa-users"></i> Nhóm</a>
-                    <a href="message.php" class="btn btn-success"><i class="fas fa-comments"></i> Chat</a>
-                    </div>
-                </div>
-                    <div class="post-form-container">
-                        <form action="submit_post.php" method="POST" enctype="multipart/form-data">
-                            <div class="post-form-body">
-                                <a href="trangcanhan.php?user_id=<?= $current_user_id ?>" style="cursor: url('/galaxy/cursor.cur'), auto;"><img src="<?php echo $currentUserAvatar; ?>" alt="Avatar" class="form-avatar"></a>
-                                <textarea name="content" class="form-control stylish-textarea" rows="3" placeholder="<?= t('congdong-1') ?> <?php echo htmlspecialchars($_SESSION['username']); ?>?"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <div class="d-flex justify-content-between">
-                                    <label for="media-upload" class="file-upload-btn"><i class="fas fa-photo-video text-success"></i> <?= t('congdong-2') ?></label>
-                                    <button type="submit" class="btn btn-primary w-50" style=" cursor:  url('/galaxy/cursor.cur'),  auto !important;"><?= t('congdong-3') ?></button>
+                        <hr>
+                        <!-- Đăng bài -->
+                        <div class="post-form-container">
+                            <form action="submit_group_post.php" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="group_id" value="<?= $gid ?>">
+                                <div class="post-form-body">
+                                    <a href="trangcanhan.php?user_id=<?= $current_user_id ?>" style="cursor: url('/galaxy/cursor.cur'), auto;"><img src="<?php echo $currentUserAvatar; ?>" alt="Avatar" class="form-avatar"></a>
+                                    <textarea name="content" class="form-control stylish-textarea" rows="3" placeholder="<?= t('congdong-1') ?> <?php echo htmlspecialchars($_SESSION['username']); ?>?"></textarea>
                                 </div>
-                                <input type="file" id="media-upload" name="media[]" multiple accept="image/*,video/*" style="display: none;">
-                                <div id="preview-container" class="mt-3"></div>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div class="post-feed">
+                                <div class="form-actions">
+                                    <div class="d-flex justify-content-between">
+                                        <label for="media-upload" class="file-upload-btn"><i class="fas fa-photo-video text-success"></i> <?= t('congdong-2') ?></label>
+                                        <button type="submit" class="btn btn-primary w-50" style=" cursor:  url('/galaxy/cursor.cur'),  auto !important;"><?= t('congdong-3') ?></button>
+                                    </div>
+                                    <input type="file" id="media-upload" name="media[]" multiple accept="image/*,video/*" style="display: none;">
+                                    <div id="preview-container" class="mt-3"></div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <hr>
+                        <!-- Hiển thị bài -->
                         <?php
-                        // Lấy danh sách user_id của người mình đang theo dõi
-                        $sql = "SELECT followed_id FROM follows WHERE follower_id = ?";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("i", $current_user_id);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-
-                        $followed_ids = [];
-                        while ($row = $result->fetch_assoc()) {
-                            $followed_ids[] = $row['followed_id'];
-                        }
-                        $followed_ids[] = $current_user_id; // Bao gồm chính mình
-
-                        // Chuyển danh sách id thành chuỗi
-                        $ids_str = implode(',', $followed_ids);
-
                         // Lấy bài viết
-                        $sql_posts = "SELECT posts.id, posts.user_id, posts.content, posts.created_at, users.username, users.avatar, users.is_verified
-                                    FROM posts JOIN users ON posts.user_id = users.id 
-                                    WHERE posts.user_id IN ($ids_str)
-                                    ORDER BY posts.created_at DESC";
-                            $result_posts = $conn->query($sql_posts);
+                         $stmt_posts = $conn->prepare("SELECT p.*, u.username, u.avatar, u.is_verified
+                                    FROM group_posts p JOIN users u ON p.user_id = u.id 
+                                    WHERE p.group_id = ?
+                                    ORDER BY p.created_at DESC");
+                            $stmt_posts->bind_param("i", $gid);
+                            $stmt_posts->execute();
+                            $result_posts = $stmt_posts->get_result();
 
                             if ($result_posts && $result_posts->num_rows > 0) {
                                 while($post = $result_posts->fetch_assoc()) {
@@ -206,7 +190,7 @@
                                         
                                         if (!empty($post['content'])) { echo '<div class="post-content">' . nl2br(htmlspecialchars($post['content'])) . '</div>'; }
                                         
-                                        $stmt_media = $conn->prepare("SELECT file_path, media_type FROM post_media WHERE post_id = ?");
+                                        $stmt_media = $conn->prepare("SELECT file_path, media_type FROM post_group_media WHERE post_id = ?");
                                         $stmt_media->bind_param("i", $post_id);
                                         $stmt_media->execute();
                                         $result_media = $stmt_media->get_result();
@@ -220,7 +204,7 @@
                                         }
                                         $stmt_media->close();
                                         
-                                        $stmt_reactions = $conn->prepare("SELECT user_id, reaction_type FROM reactions WHERE post_id = ?");
+                                        $stmt_reactions = $conn->prepare("SELECT user_id, reaction_type FROM group_reaction WHERE post_id = ?");
                                         $stmt_reactions->bind_param("i", $post_id);
                                         $stmt_reactions->execute();
                                         $result_reactions = $stmt_reactions->get_result();
@@ -252,14 +236,14 @@
                                                 }
                                             echo '</div>';
 
-                                            $stmt_comment_count = $conn->prepare("SELECT COUNT(id) as comment_count FROM comments WHERE post_id = ?");
+                                            $stmt_comment_count = $conn->prepare("SELECT COUNT(id) as comment_count FROM group_comments WHERE post_id = ?");
                                             $stmt_comment_count->bind_param("i", $post_id);
                                             $stmt_comment_count->execute();
                                             $comment_count = $stmt_comment_count->get_result()->fetch_assoc()['comment_count'];
                                             $stmt_comment_count->close();
                                             
                                             echo '<div class="text-center mt-2 border-top border-secondary pt-2">';
-                                            echo "<a href='post_details.php?id=" . $post_id . "' class='btn btn-secondary btn-sm w-100'>" . htmlspecialchars(t('congdong-11')) . " (" . $comment_count . ")</a>";
+                                            echo "<a href='post_group_detail.php?id=" . $post_id . "' class='btn btn-secondary btn-sm w-100'>" . htmlspecialchars(t('congdong-11')) . " (" . $comment_count . ")</a>";
                                             echo '</div>';
 
                                         echo '</div>';
@@ -270,12 +254,34 @@
                             }
                         ?>
                     </div>
+                    </div>
                 </div>
-            </div>
-        </main>
+            <?php else: ?>
+                <p>Hãy chọn một nhóm để xem.</p>
+            <?php endif; ?>
+        </div>
     </div>
-
-<script src="/galaxy/js/congdong.js"></script>
-
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/galaxy/js/nhom.js"></script>
 </body>
+<!-- Modal tạo nhóm -->
+<div class="modal fade" id="modalTaoNhom" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" action="tao_nhom.php" method="POST" enctype="multipart/form-data">
+      <div class="modal-header">
+        <h5 class="modal-title">Tạo nhóm mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" name="name" class="form-control mb-2" placeholder="Tên nhóm" required>
+        <textarea name="description" class="form-control mb-2" placeholder="Mô tả nhóm"></textarea>
+        <input type="file" name="cover_image" class="form-control" accept="image/*">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Tạo nhóm</button>
+      </div>
+    </form>
+  </div>
+</div>
 </html>
