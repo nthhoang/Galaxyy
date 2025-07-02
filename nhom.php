@@ -90,7 +90,7 @@ if (!isset($_SESSION['user_id'])) {
             </nav>
         </div>
     </header>
-<div class="container-fluid mt-4">
+<div class="container mt-5 pt-5">
     <div class="row">
         <!-- Danh sách nhóm bên trái -->
         <div class="col-md-4">
@@ -111,20 +111,38 @@ if (!isset($_SESSION['user_id'])) {
         <!-- Chi tiết nhóm bên phải -->
         <div class="col-md-8">
             <?php if (isset($_GET['group_id'])):
-                $gid = (int)$_GET['group_id'];
-                $stmt = $conn->prepare("SELECT * FROM groups WHERE id = ?");
-                $stmt->bind_param("i", $gid);
-                $stmt->execute();
-                $group = $stmt->get_result()->fetch_assoc();
-                ?>
+            $gid = (int)$_GET['group_id'];
+            $stmt = $conn->prepare("SELECT * FROM groups WHERE id = ?");
+            $stmt->bind_param("i", $gid);
+            $stmt->execute();
+            $group = $stmt->get_result()->fetch_assoc();
+            ?>
                 <div class="card">
                     <?php if (!empty($group['cover_image'])): ?>
-                        <img src="<?= htmlspecialchars($group['cover_image']) ?>" class="card-img-top" alt="Cover">
+                        <img src="<?= htmlspecialchars($group['cover_image']) ?>" 
+                            class="card-img-top" 
+                            alt="Cover"
+                            style="height: 350px; object-fit: cover; width: 100%;">
                     <?php endif; ?>
-                    <div class="card-body">
-                        <h4><?= htmlspecialchars($group['name']) ?></h4>
-                        <p><?= nl2br(htmlspecialchars($group['description'])) ?></p>
 
+                    <div class="card-body">
+                       <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded shadow-sm mb-3">
+                            <div class="me-3">
+                                <h4 class="mb-1 text-primary"><?= htmlspecialchars($group['name']) ?></h4>
+                                <p class="text-muted mb-0"><?= nl2br(htmlspecialchars($group['description'])) ?></p>
+                            </div>
+                            <?php if ($group['created_by'] == $current_user_id):?>
+                            <button class="btn btn-warning btn-sm btn-edit-group"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalEditGroup"
+                                    data-id="<?= $group['id'] ?>"
+                                    data-name="<?= htmlspecialchars($group['name']) ?>"
+                                    data-description="<?= htmlspecialchars($group['description']) ?>"
+                                    data-cover="<?= htmlspecialchars($group['cover_image']) ?>">
+                                <i class="bi bi-pencil me-1"></i>Chỉnh sửa nhóm
+                            </button>
+                            <?php endif; ?>
+                        </div>
                         <hr>
                         <!-- Đăng bài -->
                         <div class="post-form-container">
@@ -181,8 +199,8 @@ if (!isset($_SESSION['user_id'])) {
                                                 echo '<div class="post-options-menu">';
                                                     echo '<a href="#" class="options-btn"><i class="fas fa-ellipsis-h"></i></a>';
                                                     echo '<div class="options-dropdown">';
-                                                        echo "<a href='edit_post.php?id=" . $post['id'] . "'>" . htmlspecialchars(t('congdong-4')) . "</a>";
-                                                        echo "<a href='delete_post.php?id=" . $post['id'] . "' onclick=\"return confirm('" . addslashes(t('congdong-6')) . "');\">" . htmlspecialchars(t('congdong-5')) . "</a>";
+                                                        echo "<a href='edit_post.php?id=" . $post['id'] . "&group=true'>" . htmlspecialchars(t('congdong-4')) . "</a>";
+                                                        echo "<a href='delete_post.php?id=" . $post['id'] . "&group=true' onclick=\"return confirm('" . addslashes(t('congdong-6')) . "');\">" . htmlspecialchars(t('congdong-5')) . "</a>";
                                                     echo '</div>';
                                                 echo '</div>';
                                             }
@@ -262,6 +280,8 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 </div>
+</div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/galaxy/js/nhom.js"></script>
 </body>
@@ -284,4 +304,32 @@ if (!isset($_SESSION['user_id'])) {
     </form>
   </div>
 </div>
+<!-- Modal sửa nhóm -->
+<div class="modal fade" id="modalEditGroup" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" action="sua_nhom.php" method="POST" enctype="multipart/form-data">
+      <div class="modal-header">
+        <h5 class="modal-title">Chỉnh sửa nhóm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Ẩn ID nhóm -->
+        <input type="hidden" name="group_id" id="edit-group-id">
+
+        <label>Tên nhóm</label>
+        <input type="text" name="name" id="edit-group-name" class="form-control mb-2" required>
+
+        <label>Mô tả nhóm</label>
+        <textarea name="description" id="edit-group-description" class="form-control mb-2"></textarea>
+
+        <label>Ảnh bìa mới (tùy chọn)</label>
+        <input type="file" name="cover_image" class="form-control" accept="image/*">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </html>
