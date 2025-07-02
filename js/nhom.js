@@ -221,17 +221,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-  document.querySelectorAll('.btn-edit-group').forEach(button => {
-    button.addEventListener('click', function () {
-      const groupId = this.dataset.id;
-      const name = this.dataset.name;
-      const description = this.dataset.description;
-
-      // Gán giá trị vào form
-      document.getElementById('edit-group-id').value = groupId;
-      document.getElementById('edit-group-name').value = name;
-      document.getElementById('edit-group-description').value = description;
-    });
+document.querySelectorAll('.btn-edit-group').forEach(button => {
+  button.addEventListener('click', function () {
+    document.getElementById('edit-group-id').value = this.dataset.id;
+    document.getElementById('edit-group-name').value = this.dataset.name;
+    document.getElementById('edit-group-description').value = this.dataset.description;
+    document.getElementById('edit-group-privacy').value = this.dataset.privacy;
   });
+});
+
+document.getElementById('goto-members-tab')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    const tabTrigger = new bootstrap.Tab(document.getElementById('members-tab'));
+    tabTrigger.show();
+});
 
 });

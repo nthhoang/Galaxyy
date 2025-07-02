@@ -18,6 +18,38 @@ if (!isset($_SESSION['user_id'])) {
     $user_result = $stmt_user_avatar->get_result()->fetch_assoc();
     $currentUserAvatar = !empty($user_result['avatar']) ? htmlspecialchars($user_result['avatar']) : '/galaxy/images-icon/default_avatar.png';
     $stmt_user_avatar->close();
+
+// 1. Nhóm của bạn
+$stmt = $conn->prepare("SELECT * FROM groups WHERE created_by = ? ORDER BY created_at DESC");
+$stmt->bind_param("i", $current_user_id);
+$stmt->execute();
+$my_groups = $stmt->get_result();
+
+// 2. Nhóm đã tham gia (trừ nhóm do mình tạo)
+$stmt = $conn->prepare("
+    SELECT g.* FROM group_members gm 
+    JOIN groups g ON gm.group_id = g.id 
+    WHERE gm.user_id = ? AND g.created_by != ?
+    ORDER BY g.created_at DESC
+");
+$stmt->bind_param("ii", $current_user_id, $current_user_id);
+$stmt->execute();
+$joined_groups = $stmt->get_result();
+
+// 3. Gợi ý nhóm (không tạo và chưa tham gia)
+$stmt = $conn->prepare("
+    SELECT * FROM groups 
+    WHERE id NOT IN (
+        SELECT group_id FROM group_members WHERE user_id = ?
+        UNION
+        SELECT id FROM groups WHERE created_by = ?
+    )
+    ORDER BY created_at DESC
+");
+$stmt->bind_param("ii", $current_user_id, $current_user_id);
+$stmt->execute();
+$suggested_groups = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +61,9 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <link rel="stylesheet" href="/galaxy/css/congdong.css">
 </head>
 <body>
@@ -94,20 +129,55 @@ if (!isset($_SESSION['user_id'])) {
     <div class="row">
         <!-- Danh sách nhóm bên trái -->
         <div class="col-md-4">
-            <h4>Tất cả nhóm</h4>
-            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#modalTaoNhom">+ Tạo nhóm</button>
+            <h4 class="mb-3">Tất cả nhóm</h4>
+            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalTaoNhom">+ Tạo nhóm</button>
+
+            <!-- Nhóm của bạn -->
+            <h6 class="text-success">Nhóm của bạn</h6>
+            <ul class="list-group mb-3">
+                <?php while ($group = $my_groups->fetch_assoc()): ?>
+                    <li class="list-group-item d-flex align-items-center">
+                        <?php if (!empty($group['cover_image'])): ?>
+                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                        <?php else: ?>
+                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <?php endif; ?>
+                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
+                    </li>
+                <?php endwhile; ?>
+            </ul>
+
+            <!-- Nhóm đã tham gia -->
+            <h6 class="text-primary">Nhóm đã tham gia</h6>
+            <ul class="list-group mb-3">
+                <?php while ($group = $joined_groups->fetch_assoc()): ?>
+                    <li class="list-group-item d-flex align-items-center">
+                        <?php if (!empty($group['cover_image'])): ?>
+                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                        <?php else: ?>
+                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <?php endif; ?>
+                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
+                    </li>
+                <?php endwhile; ?>
+            </ul>
+
+            <!-- Gợi ý nhóm -->
+            <h6 class="text-muted">Gợi ý nhóm</h6>
             <ul class="list-group">
-                <?php
-                $groups = $conn->query("SELECT * FROM groups ORDER BY created_at DESC");
-                while ($group = $groups->fetch_assoc()) {
-                    echo '<li class="list-group-item">';
-                    echo '<a href="?group_id='.$group['id'].'">'.htmlspecialchars($group['name']).'</a>';
-                    echo '</li>';
-                }
-                ?>
+                <?php while ($group = $suggested_groups->fetch_assoc()): ?>
+                    <li class="list-group-item d-flex align-items-center">
+                        <?php if (!empty($group['cover_image'])): ?>
+                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                        <?php else: ?>
+                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <?php endif; ?>
+                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
+                    </li>
+                <?php endwhile; ?>
             </ul>
         </div>
-
+        
         <!-- Chi tiết nhóm bên phải -->
         <div class="col-md-8">
             <?php if (isset($_GET['group_id'])):
@@ -116,35 +186,191 @@ if (!isset($_SESSION['user_id'])) {
             $stmt->bind_param("i", $gid);
             $stmt->execute();
             $group = $stmt->get_result()->fetch_assoc();
+
+            // Giả sử bạn có $group['id'] và $current_user_id
+            $stmt = $conn->prepare("SELECT * FROM group_members WHERE group_id = ? AND user_id = ?");
+            $stmt->bind_param("ii", $group['id'], $current_user_id);
+            $stmt->execute();
+            $membership_result = $stmt->get_result();
+            $is_member = $membership_result->num_rows > 0;
+
+            // Kiểm tra đã gửi yêu cầu tham gia chưa
+            $stmt = $conn->prepare("SELECT 1 FROM group_join_requests WHERE group_id = ? AND user_id = ?");
+            $stmt->bind_param("ii", $group['id'], $current_user_id);
+            $stmt->execute();
+            $has_pending_request = $stmt->get_result()->num_rows > 0;
+            // Đếm số lượng thành viên trong nhóm
+            $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM group_members WHERE group_id = ?");
+            $stmt->bind_param("i", $gid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $memberCount = 0;
+            if ($row = $result->fetch_assoc()) {
+                $memberCount = $row['total'];
+            }
             ?>
-                <div class="card">
-                    <?php if (!empty($group['cover_image'])): ?>
+            <div class="card">
+                <?php if (!empty($group['cover_image'])): ?>
                         <img src="<?= htmlspecialchars($group['cover_image']) ?>" 
                             class="card-img-top" 
                             alt="Cover"
                             style="height: 350px; object-fit: cover; width: 100%;">
-                    <?php endif; ?>
-
-                    <div class="card-body">
-                       <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded shadow-sm mb-3">
+                <?php endif; ?>
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded shadow-sm mb-3">
                             <div class="me-3">
                                 <h4 class="mb-1 text-primary"><?= htmlspecialchars($group['name']) ?></h4>
+                                
+                                <!-- Hiển thị icon công khai hoặc riêng tư + số thành viên -->
+                                <p class="text-muted mb-1">
+                                    <?php if ($group['privacy'] == 'public'): ?>
+                                        <i class="bi bi-globe"></i> Nhóm công khai
+                                    <?php else: ?>
+                                        <i class="bi bi-lock"></i> Nhóm riêng tư
+                                    <?php endif; ?>
+                                    •  <a href="#" id="goto-members-tab" style="text-decoration: none;"><?= $memberCount ?> thành viên</a>
+                                </p>
+
                                 <p class="text-muted mb-0"><?= nl2br(htmlspecialchars($group['description'])) ?></p>
                             </div>
-                            <?php if ($group['created_by'] == $current_user_id):?>
-                            <button class="btn btn-warning btn-sm btn-edit-group"
+
+
+                           <?php if ($group['created_by'] == $current_user_id): ?>
+                            <?php
+                            // Chỉ người tạo nhóm mới cần phần này
+                            $pending_stmt = $conn->prepare("SELECT u.id, u.username FROM group_join_requests jr 
+                                JOIN users u ON jr.user_id = u.id 
+                                WHERE jr.group_id = ?");
+                            $pending_stmt->bind_param("i", $group['id']);
+                            $pending_stmt->execute();
+                            $pending_requests = $pending_stmt->get_result();
+
+                             ?>
+                             <div>
+                                 <?php if ($pending_requests->num_rows > 0): ?>
+                                    <!-- Nút duyệt -->
+                                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalDuyetThanhVien">
+                                        <i class="bi bi-person-check"></i> Duyệt thành viên (<?= $pending_requests->num_rows ?>)
+                                    </button>
+                                <?php endif; ?>
+                                <!-- Người tạo nhóm -->
+                                <button class="btn btn-warning btn-sm btn-edit-group"
                                     data-bs-toggle="modal" 
                                     data-bs-target="#modalEditGroup"
                                     data-id="<?= $group['id'] ?>"
                                     data-name="<?= htmlspecialchars($group['name']) ?>"
                                     data-description="<?= htmlspecialchars($group['description']) ?>"
+                                    data-privacy="<?= $group['privacy'] ?>"
                                     data-cover="<?= htmlspecialchars($group['cover_image']) ?>">
-                                <i class="bi bi-pencil me-1"></i>Chỉnh sửa nhóm
-                            </button>
+
+                                    <i class="bi bi-pencil me-1"></i>Chỉnh sửa nhóm
+                                </button>
+
+                            </div>
+                            <?php else: ?>
+                                <?php if ($is_member): ?>
+                                    <!-- Đã tham gia nhóm -->
+                                    <form method="POST" action="roi_nhom.php" style="display: inline;">
+                                        <input type="hidden" name="group_id" value="<?= $group['id'] ?>">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-box-arrow-left me-1"></i>Rời nhóm
+                                        </button>
+                                    </form>
+                                <?php elseif ($has_pending_request): ?> 
+                                <button class="btn btn-secondary btn-sm" disabled>Đang chờ duyệt</button>
+                                <?php else: ?>
+                                    <!-- Chưa tham gia nhóm -->
+                                    <form method="POST" action="thamgia_nhom.php" style="display: inline;">
+                                        <input type="hidden" name="group_id" value="<?= $group['id'] ?>">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-person-plus me-1"></i>Tham gia nhóm
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
-                        <hr>
+            </div>
+
+            <!-- Tabs điều hướng -->
+            <ul class="nav nav-tabs mb-3 mt-2" id="groupTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link " id="intro-tab" data-bs-toggle="tab" data-bs-target="#intro" type="button" role="tab">Giới thiệu</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="discussion-tab" data-bs-toggle="tab" data-bs-target="#discussion" type="button" role="tab">Thảo luận</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab">Thành viên</button>
+            </li>
+            </ul>
+
+            <!-- Nội dung các tab -->
+            <div class="tab-content" id="groupTabContent">
+            <!-- Giới thiệu -->
+            <div class="tab-pane fade" id="intro" role="tabpanel">
+                <?php
+                $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
+                $stmt->bind_param("i", $group['created_by']);
+                $stmt->execute();
+                $userName = $stmt->get_result()->fetch_column();
+
+                $stmt = $conn->prepare("SELECT COUNT(*) FROM group_members WHERE group_id = ?");
+                $stmt->bind_param("i", $gid);
+                $stmt->execute();
+                $member = $stmt->get_result()->fetch_column();
+                ?>
+
+                <h5><?= htmlspecialchars($group['name']) ?></h5>
+                <p><?= nl2br(htmlspecialchars($group['description'])) ?></p>
+                <p><strong>Loại nhóm:</strong> <?= $group['privacy'] === 'public' ? 'Công khai' : 'Riêng tư' ?></p>
+                <p><strong>Người tạo:</strong> <?= $userName ?></p>
+                <p><strong>Số thành viên:</strong> <?= $member ?></p>
+            </div>
+
+            
+            <!-- Thành viên -->
+            <div class="tab-pane fade" id="members" role="tabpanel">
+                <?php
+               $allMembers = [];
+                $stmt = $conn->prepare("SELECT u.id, u.username, u.avatar, gm.role FROM group_members gm 
+                                        JOIN users u ON gm.user_id = u.id 
+                                        WHERE gm.group_id = ?");
+                $stmt->bind_param("i", $gid);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                while ($row = $result->fetch_assoc()) {
+                    $allMembers[$row['role']][] = $row;
+                }
+                ?>
+                <h5>Quản trị viên</h5>
+                <ul class="list-group">
+                <?php foreach ($allMembers['admin'] ?? [] as $admin): ?>
+                       <li class="list-group-item d-flex align-items-center">
+                            <a href="trangcanhan.php?user_id=<?= $admin['id'] ?>" style="text-decoration: none;">
+                                <img src="<?= htmlspecialchars($admin['avatar'] ?? '/default-avatar.png') ?>" alt="avatar" class="me-2 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                <strong><?= htmlspecialchars($admin['username']) ?></strong> <span class="badge bg-primary ms-2">Admin</span>
+                            </a>
+                        </li>
+                <?php endforeach; ?>
+                </ul>
+
+                <h5>Thành viên</h5>
+                <ul class="list-group">
+                <?php foreach ($allMembers['member'] ?? [] as $member): ?>
+                        <li class="list-group-item d-flex align-items-center">
+                            <a href="trangcanhan.php?user_id=<?= $member['id'] ?>" style="text-decoration: none;">
+                                <img src="<?= htmlspecialchars($member['avatar'] ?? '/default-avatar.png') ?>" alt="avatar" class="me-2 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                <?= htmlspecialchars($member['username']) ?>
+                            </a>
+                        </li>
+                <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <!-- Thảo luận -->
+            <div class="tab-pane fade show active" id="discussion" role="tabpanel">
+                    <div class="card-body">
                         <!-- Đăng bài -->
+                         <?php if($group['created_by'] == $current_user_id || $is_member):?>
                         <div class="post-form-container">
                             <form action="submit_group_post.php" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="group_id" value="<?= $gid ?>">
@@ -162,11 +388,12 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                             </form>
                         </div>
-
-                        <hr>
+                        <?php endif; ?>
                         <!-- Hiển thị bài -->
                         <?php
+                        $isGroupPublic = ($group['privacy'] === 'public');
                         // Lấy bài viết
+                        if($group['created_by'] == $current_user_id || $is_member || $isGroupPublic) {
                          $stmt_posts = $conn->prepare("SELECT p.*, u.username, u.avatar, u.is_verified
                                     FROM group_posts p JOIN users u ON p.user_id = u.id 
                                     WHERE p.group_id = ?
@@ -270,6 +497,7 @@ if (!isset($_SESSION['user_id'])) {
                             } else {
                                 echo '<p class="text-center">Chưa có bài đăng nào.</p>';
                             }
+                        }
                         ?>
                     </div>
                     </div>
@@ -277,9 +505,10 @@ if (!isset($_SESSION['user_id'])) {
             <?php else: ?>
                 <p>Hãy chọn một nhóm để xem.</p>
             <?php endif; ?>
-        </div>
+                </div>
+            </div>
+        </div>    
     </div>
-</div>
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -289,19 +518,24 @@ if (!isset($_SESSION['user_id'])) {
 <div class="modal fade" id="modalTaoNhom" tabindex="-1">
   <div class="modal-dialog">
     <form class="modal-content" action="tao_nhom.php" method="POST" enctype="multipart/form-data">
-      <div class="modal-header">
-        <h5 class="modal-title">Tạo nhóm mới</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <input type="text" name="name" class="form-control mb-2" placeholder="Tên nhóm" required>
-        <textarea name="description" class="form-control mb-2" placeholder="Mô tả nhóm"></textarea>
-        <input type="file" name="cover_image" class="form-control" accept="image/*">
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Tạo nhóm</button>
-      </div>
-    </form>
+  <div class="modal-header">
+    <h5 class="modal-title">Tạo nhóm mới</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  </div>
+  <div class="modal-body">
+    <input type="text" name="name" class="form-control mb-2" placeholder="Tên nhóm" required>
+    <textarea name="description" class="form-control mb-2" placeholder="Mô tả nhóm"></textarea>
+    <select name="privacy" class="form-select mb-2" required>
+      <option value="public">Nhóm công khai</option>
+      <option value="private">Nhóm riêng tư</option>
+    </select>
+    <input type="file" name="cover_image" class="form-control" accept="image/*">
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary">Tạo nhóm</button>
+  </div>
+</form>
+
   </div>
 </div>
 <!-- Modal sửa nhóm -->
@@ -322,6 +556,11 @@ if (!isset($_SESSION['user_id'])) {
         <label>Mô tả nhóm</label>
         <textarea name="description" id="edit-group-description" class="form-control mb-2"></textarea>
 
+        <select name="privacy" id="edit-group-privacy" class="form-select mb-2" required>
+        <option value="public">Nhóm công khai</option>
+        <option value="private">Nhóm riêng tư</option>
+        </select>
+
         <label>Ảnh bìa mới (tùy chọn)</label>
         <input type="file" name="cover_image" class="form-control" accept="image/*">
       </div>
@@ -331,5 +570,29 @@ if (!isset($_SESSION['user_id'])) {
     </form>
   </div>
 </div>
+<!-- modal duyet thanh vien -->
+<div class="modal fade" id="modalDuyetThanhVien" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" action="duyet_thanhvien.php" method="POST">
+      <div class="modal-header">
+        <h5 class="modal-title">Duyệt thành viên</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <?php while ($req = $pending_requests->fetch_assoc()): ?>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="approve_users[]" value="<?= $req['id'] ?>" checked>
+            <label class="form-check-label"><?= htmlspecialchars($req['username']) ?></label>
+          </div>
+        <?php endwhile; ?>
+        <input type="hidden" name="group_id" value="<?= $group['id'] ?>">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Duyệt các thành viên</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 </html>
