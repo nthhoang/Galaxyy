@@ -237,7 +237,7 @@ $suggested_groups = $stmt->get_result();
                            <?php if ($group['created_by'] == $current_user_id): ?>
                             <?php
                             // Chỉ người tạo nhóm mới cần phần này
-                            $pending_stmt = $conn->prepare("SELECT u.id, u.username FROM group_join_requests jr 
+                            $pending_stmt = $conn->prepare("SELECT u.id, u.username, u.avatar FROM group_join_requests jr 
                                 JOIN users u ON jr.user_id = u.id 
                                 WHERE jr.group_id = ?");
                             $pending_stmt->bind_param("i", $group['id']);
@@ -251,7 +251,7 @@ $suggested_groups = $stmt->get_result();
                                     <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalDuyetThanhVien">
                                         <i class="bi bi-person-check"></i> Duyệt thành viên (<?= $pending_requests->num_rows ?>)
                                     </button>
-                                <?php endif; ?>
+                                <?php endif; ?> 
                                 <!-- Người tạo nhóm -->
                                 <button class="btn btn-warning btn-sm btn-edit-group"
                                     data-bs-toggle="modal" 
@@ -580,9 +580,14 @@ $suggested_groups = $stmt->get_result();
       </div>
       <div class="modal-body">
         <?php while ($req = $pending_requests->fetch_assoc()): ?>
-          <div class="form-check">
+          <div class="form-check d-flex align-items-center gap-2">
             <input class="form-check-input" type="checkbox" name="approve_users[]" value="<?= $req['id'] ?>" checked>
-            <label class="form-check-label"><?= htmlspecialchars($req['username']) ?></label>
+            <div>
+            <a href="trangcanhan.php?user_id=<?= $req['id'] ?>" style="text-decoration: none;">
+                <img src="<?= htmlspecialchars($req['avatar'] ?? '/default-avatar.png') ?>" alt="avatar" class="me-2 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                <label class="form-check-label"><?= htmlspecialchars($req['username']) ?></label>
+            </a>
+            </div>
           </div>
         <?php endwhile; ?>
         <input type="hidden" name="group_id" value="<?= $group['id'] ?>">

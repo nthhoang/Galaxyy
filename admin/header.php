@@ -26,7 +26,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="index.php">
             <i class="fas fa-rocket"></i>
             Galaxy Admin
         </a>
