@@ -40,6 +40,9 @@
                     <a class="nav-link" href="user_management.php">Người dùng</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="group_management.php">Nhóm</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="community_management.php">Bài đăng CĐ</a>
                 </li>
                 <li class="nav-item">
