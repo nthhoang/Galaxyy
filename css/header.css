@@ -92,6 +92,7 @@
   align-items: center;
   flex-shrink: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  gap: 20px;
 }
 
 #menuhead nav ul li:last-child {

@@ -2,7 +2,31 @@
 session_start();
 $loggedIn = isset($_SESSION['username']);
 ?>
-<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
+?>
+
+<?php
+
+$user_id = $_SESSION['user_id'];
+
+$sql = "SELECT * FROM notifications WHERE user_id = ? OR user_id IS NULL ORDER BY created_at DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$notifications = $result->fetch_all(MYSQLI_ASSOC);
+
+$unreadCount = 0;
+foreach ($notifications as $n) {
+  if ($n['is_read'] == 0) {
+    $unreadCount++;
+  }
+}
+
+?>
+
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -23,12 +47,68 @@ $loggedIn = isset($_SESSION['username']);
  
      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
+    <style>
+    #notification-bell {
+  position: relative;
+  cursor: pointer;
+  font-size: 34px;
+}
 
+#notification-count {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  display: none;
+}
+
+#notification-list {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 999;
+}
+
+#notification-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#notification-items li {
+  display: block !important;     /* ✅ Rất quan trọng để xuống dòng */
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 14px;
+  color:cadetblue;
+}
+
+#notification-items li i {
+  margin-right: 8px;
+  color: #666;
+}
+
+    </style>
 <body>
    
-  <header id="head"> <div class="logo-container">
-    <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
-</div>
+  <header id="head"> 
+    <div class="logo-container">
+      <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
+    </div>
        <div id="menuhead">
         
         <nav>
@@ -83,9 +163,17 @@ $loggedIn = isset($_SESSION['username']);
              </a>
         </div>
     </li> 
-
 </ul>
-        </nav></div>
+ </nav>  
+        <div id="notification-wrapper"  style="position: relative;">
+        <i id="notification-bell" class="fa fa-bell"></i>
+        <span id="notification-count">0</span>
+        <div id="notification-list">
+            <ul id="notification-items" style="display: block;"></ul>
+        </div>
+        </div>
+</div>
+     
 </header>
 
      <main class="sun-content-section">
@@ -105,6 +193,84 @@ $loggedIn = isset($_SESSION['username']);
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- <script src="script.js"></script> -->
      <script src="/galaxy/js/trangchu.js"></script>
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+   <script>
+  const storedNotifications = <?php echo json_encode($notifications); ?>;
+  let notificationCount = <?php echo $unreadCount; ?>;
+  let notifications = storedNotifications;
+</script>
+
+
+    <script>
+
+const socket = io("http://localhost:3000");
+const user_id = "<?php echo $_SESSION['user_id']; ?>";
+socket.emit("register", user_id);
+// Hiển thị ban đầu từ DB
+updateNotificationUI();
+
+// Khi nhận thông báo real-time từ socket
+socket.on("receive_notification", (data) => {
+  if (data.type === "new_article") {
+    notificationCount++;
+    notifications.unshift({
+  message: data.message,
+  is_read: 0
+});// push vào đầu danh sách
+    updateNotificationUI();
+  }
+});
+
+// Render toàn bộ thông báo
+function updateNotificationUI() {
+  const countElem = document.getElementById("notification-count");
+  const listElem = document.getElementById("notification-items");
+
+  countElem.innerText = notificationCount;
+  countElem.style.display = notificationCount > 0 ? "inline-block" : "none";
+
+  listElem.innerHTML = "";
+  notifications.forEach(n => {
+    const li = document.createElement("li");
+    li.innerHTML = `<i class="fa fa-newspaper-o"></i> ${n.message}`;
+    if (n.is_read == 0) {
+      li.style.fontWeight = "bold"; // thông báo chưa đọc in đậm
+    }
+    listElem.appendChild(li);
+  });
+}
+
+
+
+document.getElementById("notification-bell").addEventListener("click", () => {
+  const list = document.getElementById("notification-list");
+
+  if (list.style.display === "none") {
+    list.style.display = "block";
+
+    // Gửi AJAX đánh dấu đã đọc
+    fetch("read_notifications.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: user_id })
+    });
+
+    notificationCount = 0;
+    document.getElementById("notification-count").style.display = "none";
+
+    // Đánh dấu trên giao diện (không cần reload)
+    notifications = notifications.map(n => ({ ...n, is_read: 1 }));
+    updateNotificationUI();
+
+  } else {
+    list.style.display = "none";
+  }
+});
+
+
+
+</script>
+
 
 
 </body>

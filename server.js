@@ -36,4 +36,46 @@ io.on("connection", (socket) => {
     }
     console.log("User disconnected:", socket.id);
   });
+
+    // Admin gửi thông báo đăng bài mới đến tất cả
+  socket.on("admin_post_article", (data) => {
+    const { message } = data;
+
+    console.log("New article posted, sending to all users:", message);
+
+    // Gửi thông báo đến tất cả user đang online
+    for (let user_id in users) {
+      io.to(users[user_id]).emit("receive_notification", {
+        type: "new_article",
+        message: message
+      });
+    }
+  });
+
 });
+
+const express = require("express");
+const app = express();
+app.use(express.json()); // Cho phép nhận body dạng JSON
+
+// Endpoint để PHP gọi gửi thông báo
+app.post("/notify", (req, res) => {
+  const { message } = req.body;
+
+  console.log("Received notification from PHP:", message);
+
+  for (let user_id in users) {
+    io.to(users[user_id]).emit("receive_notification", {
+      type: "new_article",
+      message
+    });
+  }
+
+  res.send({ success: true });
+});
+
+// Mở cổng API riêng (khác với socket)
+app.listen(4000, () => {
+  console.log("API server đang chạy tại http://localhost:4000");
+});
+

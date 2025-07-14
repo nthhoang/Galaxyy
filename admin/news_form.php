@@ -145,4 +145,5 @@ if ($is_edit) {
   tinymce.init({ selector: 'textarea#content_editor_en', /* ... các cấu hình khác ... */ });
 </script>
 
+
 <?php include 'footer.php'; ?>

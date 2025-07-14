@@ -206,7 +206,7 @@ if ($conversation_id) {
 
     const form = document.querySelector('.message-form form');
     if (form) {
-        form.addEventListener('submit', async function (e) {
+    form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const message = this.message.value.trim();
     const imageFile = this.image.files[0];

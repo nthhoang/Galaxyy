@@ -11,7 +11,15 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/hqvxm4gjav13aefmubtmp0ubu0a9631gs4536ck1x6tnbg8c/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="tinymce/tinymce.min.js"></script>
+<script>
+  tinymce.init({
+    selector: '#mytextarea',
+    plugins: 'lists link image table code',
+    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code',
+    branding: false
+  });
+</script>
 
     <style>
         body {

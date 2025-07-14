@@ -38,7 +38,30 @@ if (isset($_POST['save_news'])) {
         $stmt->bind_param("sssssssssi", $title_vi, $category_vi, $excerpt_vi, $full_content_vi, $title_en, $category_en, $excerpt_en, $full_content_en, $image_url, $is_featured);
     }
 
-    $stmt->execute();
+    $success = $stmt->execute();
+
+    if ($success) {
+    // Sau khi lưu bài thành công -> gửi thông báo
+    $message = "📰 Admin vừa đăng tin tức mới: \"$title_vi $title_en\"";
+    $sql = "INSERT INTO notifications (user_id, message) VALUES (NULL, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$message]);
+
+    $data = ['message' => $message];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/json",
+            'method'  => 'POST',
+            'content' => json_encode($data),
+        ]
+    ];
+    $context = stream_context_create($options);
+    file_get_contents("http://localhost:4000/notify", false, $context);
+
+    } else {
+    echo "Lỗi khi lưu bài viết!";
+    }
     header("Location: news_management.php");
     exit();
 }
