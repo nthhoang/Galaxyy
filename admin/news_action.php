@@ -33,21 +33,32 @@ if (isset($_POST['save_news'])) {
         $id = (int)$_POST['id'];
         $stmt = $conn->prepare("UPDATE news SET title_vi=?, category_vi=?, excerpt_vi=?, full_content_vi=?, title_en=?, category_en=?, excerpt_en=?, full_content_en=?, image_url=?, is_featured=? WHERE id=?");
         $stmt->bind_param("ssssssssssi", $title_vi, $category_vi, $excerpt_vi, $full_content_vi, $title_en, $category_en, $excerpt_en, $full_content_en, $image_url, $is_featured, $id);
+        $stmt->execute();
     } else { // THÊM
        $stmt = $conn->prepare("INSERT INTO news (title_vi, category_vi, excerpt_vi, full_content_vi, title_en, category_en, excerpt_en, full_content_en, image_url, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssssssi", $title_vi, $category_vi, $excerpt_vi, $full_content_vi, $title_en, $category_en, $excerpt_en, $full_content_en, $image_url, $is_featured);
-    }
-
-    $success = $stmt->execute();
+    
+           $success = $stmt->execute();
 
     if ($success) {
+    $inserted_id = $conn->insert_id;
     // Sau khi lưu bài thành công -> gửi thông báo
     $message = "📰 Admin vừa đăng tin tức mới: \"$title_vi $title_en\"";
-    $sql = "INSERT INTO notifications (user_id, message) VALUES (NULL, ?)";
+    $sql = "INSERT INTO notifications (user_id, message, id_news) VALUES (NULL, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->execute([$message]);
+    $stmt->bind_param("si", $message, $inserted_id);  // "s" = string, "i" = integer
+    $stmt->execute();
+    
+    $notification_id = $conn->insert_id; 
+    // Lấy created_at
+    $stmt2 = $conn->prepare("SELECT created_at FROM notifications WHERE id = ?");
+    $stmt2->bind_param("i", $notification_id);
+    $stmt2->execute();
+    $result = $stmt2->get_result();
+    $row = $result->fetch_assoc();
+    $created_at = $row['created_at'];
 
-    $data = ['message' => $message];
+    $data = ['message' => $message, 'id' => $inserted_id, 'created_at' => $created_at];
 
     $options = [
         'http' => [
@@ -62,6 +73,9 @@ if (isset($_POST['save_news'])) {
     } else {
     echo "Lỗi khi lưu bài viết!";
     }
+
+    }
+
     header("Location: news_management.php");
     exit();
 }

@@ -60,14 +60,15 @@ app.use(express.json()); // Cho phép nhận body dạng JSON
 
 // Endpoint để PHP gọi gửi thông báo
 app.post("/notify", (req, res) => {
-  const { message } = req.body;
+  const { message, id, created_at } = req.body;
 
-  console.log("Received notification from PHP:", message);
-
+  
   for (let user_id in users) {
     io.to(users[user_id]).emit("receive_notification", {
       type: "new_article",
-      message
+      id,
+      message,
+      created_at
     });
   }
 

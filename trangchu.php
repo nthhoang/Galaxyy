@@ -18,12 +18,25 @@ $stmt->execute();
 $result = $stmt->get_result();
 $notifications = $result->fetch_all(MYSQLI_ASSOC);
 
-$unreadCount = 0;
-foreach ($notifications as $n) {
-  if ($n['is_read'] == 0) {
-    $unreadCount++;
-  }
-}
+
+$sql = "SELECT COUNT(*) AS unread_count
+        FROM notifications n
+        WHERE 
+            (n.user_id IS NULL OR n.user_id = ?)
+            AND NOT EXISTS (
+                SELECT 1
+                FROM notification_user nu
+                WHERE nu.notification_id = n.id
+                  AND nu.user_id = ?
+            )";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $user_id, $user_id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$unreadCount = $row['unread_count'];
 
 ?>
 
@@ -94,12 +107,25 @@ foreach ($notifications as $n) {
   white-space: normal;
   word-break: break-word;
   font-size: 14px;
+}
+
+#notification-items li a {
   color:cadetblue;
+  text-decoration-line: none;
+}
+
+#notification-items li a:hover {
+  color:darkolivegreen;
 }
 
 #notification-items li i {
   margin-right: 8px;
   color: #666;
+}
+
+#notification-items li .time_up{
+  font-size: small;
+  color:cornflowerblue;
 }
 
     </style>
@@ -214,11 +240,12 @@ socket.on("receive_notification", (data) => {
   if (data.type === "new_article") {
     notificationCount++;
     notifications.unshift({
+  id_news: data.id,
   message: data.message,
-  is_read: 0
+  created_at: data.created_at
 });// push vào đầu danh sách
     updateNotificationUI();
-  }
+}
 });
 
 // Render toàn bộ thông báo
@@ -232,7 +259,9 @@ function updateNotificationUI() {
   listElem.innerHTML = "";
   notifications.forEach(n => {
     const li = document.createElement("li");
-    li.innerHTML = `<i class="fa fa-newspaper-o"></i> ${n.message}`;
+    const createdAt = n.created_at;
+    const timeString = timeAgo(createdAt);
+    li.innerHTML = `<a href="view_news.php?id=${n.id_news}"> <i class="fa fa-newspaper-o"></i> ${n.message} </a><br> <p class="time_up">Đăng lúc: ${timeString}</p>`;
     if (n.is_read == 0) {
       li.style.fontWeight = "bold"; // thông báo chưa đọc in đậm
     }
@@ -267,7 +296,17 @@ document.getElementById("notification-bell").addEventListener("click", () => {
   }
 });
 
+function timeAgo(datetime) {
+  const seconds = Math.floor((new Date() - new Date(datetime)) / 1000);
 
+  if (seconds < 60) return seconds + " giây trước";
+  if (seconds < 3600) return Math.floor(seconds / 60) + " phút trước";
+  if (seconds < 86400) return Math.floor(seconds / 3600) + " giờ trước";
+  if (seconds < 2592000) return Math.floor(seconds / 86400) + " ngày trước";
+  if (seconds < 31104000) return Math.floor(seconds / 2592000) + " tháng trước";
+
+  return Math.floor(seconds / 31104000) + " năm trước";
+}
 
 </script>
 

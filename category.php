@@ -235,7 +235,7 @@ $latest_news = $result_latest->fetch_all(MYSQLI_ASSOC);
                         <div class="mb-5"> <!-- Khoảng cách giữa các nhóm -->
                             <h3 class="section-title mb-3"><?= htmlspecialchars($category) ?></h3>
                             <div class="row">
-                                <?php foreach (array_slice($news_list, 0, 4) as $row): ?>
+                                <?php foreach (array_slice($news_list, 0, 6) as $row): ?>
                                     <div class="col-md-12 col-lg-6 mb-4" data-aos="fade-up" data-aos-duration="800">
                                         <div class="card news-card h-100">
                                             <img src="<?= htmlspecialchars($row['image_url'] ?: 'assets/images/default-news.jpg') ?>" class="card-img-top news-card-img" alt="<?= htmlspecialchars($row['title']) ?>">
