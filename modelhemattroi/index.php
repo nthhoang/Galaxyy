@@ -2,7 +2,9 @@
 session_start();
 $loggedIn = isset($_SESSION['username']);
 ?>
-<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; ?>
+<?php 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,67 +23,74 @@ $loggedIn = isset($_SESSION['username']);
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&family=Noto+Sans:wght@400;600&family=Poppins:wght@300;400;600;700&display=swap&subset=vietnamese" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="/galaxy/css/model3dhmt.css">
+    <link rel="stylesheet" href="/galaxy/css/noti.css">
 </head>
- <header id="head"> <div class="logo-container">
-    <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
-</div>
-       <div id="menuhead">
-        
+ <header id="head"> 
+    <div class="logo-container">
+        <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
+    </div>
+    <div id="menuhead">
         <nav>
-           <button id="menu-toggle" aria-label="Mở menu">☰</button>
+            <button id="menu-toggle" aria-label="Mở menu">☰</button>
+            <ul id="main-menu">
+                <li><a href="/galaxy/trangchu.php" class="active"><img src="/galaxy/images-icon/home.png" alt=""><?= t('1') ?></a></li>
 
-        <ul id="main-menu">
-    <li><a href="/galaxy/trangchu.php" class="active"><img src="/galaxy/images-icon/home.png" alt=""><?= t('1') ?></a></li>
+                <li class="dropdown">
+                    <a href="#"><img src="/galaxy/images-icon/hemattroi.png" alt=""><?= t('2') ?></a>
+                    <div class="dropdown-content">
+                        <a class="item" href="/galaxy/hemattroi/mattroi.php"><img src="/galaxy/images-icon/sun.png" alt=""><?= t('2,1') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saothuy.php"><img src="/galaxy/images-icon/mercury.png" alt=""><?= t('2,2') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saokim.php"><img src="/galaxy/images-icon/venus.png" alt=""><?= t('2,3') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/traidat.php"><img src="/galaxy/images-icon/earth.png" alt=""><?= t('2,4') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/mattrang.php"><img src="/galaxy/images-icon/full-moon.png" alt=""><?= t('2,5') ?> </a>
+                        <a class="item" href="/galaxy/hemattroi/saohoa.php"><img src="/galaxy/images-icon/mars.png" alt=""><?= t('2,6') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saomoc.php"><img src="/galaxy/images-icon/jupiter.png" alt=""><?= t('2,7') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saotho.php"><img src="/galaxy/images-icon/saturn.png" alt=""><?= t('2,8') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saothienvuong.php"><img src="/galaxy/images-icon/uranus.png" alt=""><?= t('2,9') ?></a>
+                        <a class="item" href="/galaxy/hemattroi/saohaivuong.php"><img src="/galaxy/images-icon/neptune.png" alt=""><?= t('2,10') ?></a>
+                    </div>
+                </li>
 
-    <li class="dropdown">
-        <a href="#"><img src="/galaxy/images-icon/hemattroi.png" alt=""><?= t('2') ?></a>
-        <div class="dropdown-content">
-            <a class="item" href="/galaxy/hemattroi/mattroi.php"><img src="/galaxy/images-icon/sun.png" alt=""><?= t('2,1') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saothuy.php"><img src="/galaxy/images-icon/mercury.png" alt=""><?= t('2,2') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saokim.php"><img src="/galaxy/images-icon/venus.png" alt=""><?= t('2,3') ?></a>
-            <a class="item" href="/galaxy/hemattroi/traidat.php"><img src="/galaxy/images-icon/earth.png" alt=""><?= t('2,4') ?></a>
-            <a class="item" href="/galaxy/hemattroi/mattrang.php"><img src="/galaxy/images-icon/full-moon.png" alt=""><?= t('2,5') ?> </a>
-            <a class="item" href="/galaxy/hemattroi/saohoa.php"><img src="/galaxy/images-icon/mars.png" alt=""><?= t('2,6') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saomoc.php"><img src="/galaxy/images-icon/jupiter.png" alt=""><?= t('2,7') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saotho.php"><img src="/galaxy/images-icon/saturn.png" alt=""><?= t('2,8') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saothienvuong.php"><img src="/galaxy/images-icon/uranus.png" alt=""><?= t('2,9') ?></a>
-            <a class="item" href="/galaxy/hemattroi/saohaivuong.php"><img src="/galaxy/images-icon/neptune.png" alt=""><?= t('2,10') ?></a>
+                <li class="dropdown">
+                    <a href="#"><img src="/galaxy/images-icon/black-hole.png" alt=""><?= t('3') ?></a>
+                    <div class="dropdown-content">
+                        <a class="item" href="/galaxy/vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
+                        <a class="item" href="/galaxy/sukien.php"><img src="/galaxy/images-icon/sukien.png" alt=""><?= t('3,1') ?> </a>
+                        <a class="item" href="/galaxy/tintuc.php"><img src="/galaxy/images-icon/news.png" alt=""><?= t('3,2') ?> </a>
+                    </div>
+                </li> <li><a href="/galaxy/congdong.php"><img src="/galaxy/images-icon/group (1).png" alt=""><?= t('4') ?></a></li>
+
+                <li>
+                    <a href="<?php echo $loggedIn ? '/galaxy/taikhoan.php' : '/galaxy/TAIKHOAN/login-register.html'; ?>">
+                        <img src="/galaxy/images-icon/dangnhap.png" alt=""><?= t('5') ?>
+                    </a>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#"><img src="/galaxy/images-icon/more.png" alt=""><?= t('6') ?></a>
+                    <div class="dropdown-content" style="left: -170%">
+                        <a class="item" href="/galaxy/vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
+                        <a class="language-switcher-container">
+                    <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"
+                        <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>
+                    >
+                    <label for="lang-toggle" class="lang-toggle-label">
+                        <span class="lang-toggle-inner"></span>
+                        <span class="lang-toggle-switch"></span>
+                    </label>
+                        </a>
+                    </div>
+                </li> 
+            </ul>
+        </nav>
+        <div id="notification-wrapper"  style="position: relative;">
+            <i id="notification-bell" class="fa fa-bell"></i>
+            <span id="notification-count">0</span>
+            <div id="notification-list">
+                <ul id="notification-items" style="display: block;"></ul>
+            </div>
         </div>
-    </li>
-
-    <li class="dropdown">
-        <a href="#"><img src="/galaxy/images-icon/black-hole.png" alt=""><?= t('3') ?></a>
-        <div class="dropdown-content">
-            <a class="item" href="/galaxy/vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
-            <a class="item" href="/galaxy/sukien.php"><img src="/galaxy/images-icon/sukien.png" alt=""><?= t('3,1') ?> </a>
-            <a class="item" href="/galaxy/tintuc.php"><img src="/galaxy/images-icon/news.png" alt=""><?= t('3,2') ?> </a>
-        </div>
-    </li> <li><a href="/galaxy/congdong.php"><img src="/galaxy/images-icon/group (1).png" alt=""><?= t('4') ?></a></li>
-
-    <li>
-        <a href="<?php echo $loggedIn ? '/galaxy/taikhoan.php' : '/galaxy/TAIKHOAN/login-register.html'; ?>">
-            <img src="/galaxy/images-icon/dangnhap.png" alt=""><?= t('5') ?>
-        </a>
-    </li>
-
-    <li class="dropdown">
-        <a href="#"><img src="/galaxy/images-icon/more.png" alt=""><?= t('6') ?></a>
-        <div class="dropdown-content" style="left: -170%">
-            <a class="item" href="/galaxy/vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
-            <a class="language-switcher-container">
-        <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"
-               <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>
-        >
-        <label for="lang-toggle" class="lang-toggle-label">
-            <span class="lang-toggle-inner"></span>
-            <span class="lang-toggle-switch"></span>
-        </label>
-             </a>
-        </div>
-    </li> 
-
-</ul>
-        </nav></div>
+    </div>
 </header>
 
 <body>
@@ -446,6 +455,16 @@ $loggedIn = isset($_SESSION['username']);
         });
     });
 </script>
+
+  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+
+  <script>
+    const storedNotifications = <?php echo json_encode($notifications); ?>;
+    let notificationCount = <?php echo $unreadCount; ?>;
+    let notifications = storedNotifications;
+    const user_id = "<?php echo $_SESSION['user_id']; ?>";
+  </script>
+  <script src="/galaxy/js/noti.js"></script>
 
 </body>
 </html>

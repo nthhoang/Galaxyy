@@ -1,0 +1,66 @@
+#notification-bell {
+  position: relative;
+  cursor: pointer;
+  font-size: 34px;
+}
+
+#notification-count {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  display: none;
+}
+
+#notification-list {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 999;
+}
+
+#notification-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#notification-items li {
+  display: block !important;     /* ✅ Rất quan trọng để xuống dòng */
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 14px;
+}
+
+#notification-items li a {
+  color:cadetblue;
+  text-decoration-line: none;
+}
+
+#notification-items li a:hover {
+  color:darkolivegreen;
+}
+
+#notification-items li i {
+  margin-right: 8px;
+  color: #666;
+}
+
+#notification-items li .time_up{
+  font-size: small;
+  color:cornflowerblue;
+}

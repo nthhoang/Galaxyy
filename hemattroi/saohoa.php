@@ -2,7 +2,8 @@
 session_start();
 $loggedIn = isset($_SESSION['username']);
 ?>
-<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,6 +17,8 @@ $loggedIn = isset($_SESSION['username']);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap&subset=vietnamese" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/galaxy/css/noti.css">
 
     <style>
         /* CSS CHO NỘI DUNG TRANG SAO HỎA */
@@ -253,15 +256,16 @@ $loggedIn = isset($_SESSION['username']);
 </head>
 
 <body>
-   <header id="head"> <div class="logo-container">
-    <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
-</div>
-       <div id="menuhead">
+   <header id="head"> 
+        <div class="logo-container">
+            <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
+        </div>
+        <div id="menuhead">
         
         <nav>
-           <button id="menu-toggle" aria-label="Mở menu">☰</button>
+            <button id="menu-toggle" aria-label="Mở menu">☰</button>
 
-        <ul id="main-menu">
+            <ul id="main-menu">
                 <li><a href="/galaxy/trangchu.php"><img src="/galaxy/images-icon/home.png" alt=""><?= t('1') ?></a></li>
 
                 <li class="dropdown">
@@ -284,28 +288,38 @@ $loggedIn = isset($_SESSION['username']);
                         <a class="item" href="/galaxy/vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
                         <a class="item" href="/galaxy/sukien.php"><img src="/galaxy/images-icon/sukien.png" alt=""><?= t('3,1') ?> </a>
                         <a class="item" href="/galaxy/tintuc.php"><img src="/galaxy/images-icon/news.png" alt=""><?= t('3,2') ?>
-                 <li ><a href="/galaxy/congdong.php"><img src="/galaxy/images-icon/group (1).png" alt=""><?= t('4') ?></a>  </li>
-               <li>
-  <a href="<?php echo $loggedIn ? '/galaxy/taikhoan.php' : '/galaxy/TAIKHOAN/login-register.html'; ?>">
-    <img src="/galaxy/images-icon/dangnhap.png" alt=""><?= t('5') ?>
-  </a>
-</li>
+                    </div>
+                </li>
+                <li><a href="/galaxy/congdong.php"><img src="/galaxy/images-icon/group (1).png" alt=""><?= t('4') ?></a>  </li>
+                <li>
+                    <a href="<?php echo $loggedIn ? '/galaxy/taikhoan.php' : '/galaxy/TAIKHOAN/login-register.html'; ?>">
+                        <img src="/galaxy/images-icon/dangnhap.png" alt=""><?= t('5') ?>
+                    </a>
+                </li>
                 <li class="dropdown"><a href="#"><img src="/galaxy/images-icon/more.png" alt=""><?= t('6') ?></a>
-                     <div class="dropdown-content" style="left: -170%">
+                    <div class="dropdown-content" style="left: -170%">
                         <a class="item" href="/galaxy/vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
                         <a class="language-switcher-container">
-        <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"
-               <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>
-        >
-        <label for="lang-toggle" class="lang-toggle-label">
-            <span class="lang-toggle-inner"></span>
-            <span class="lang-toggle-switch"></span>
-        </label>
-             </a>
-                     </div>
+                        <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"
+                            <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>
+                        >
+                        <label for="lang-toggle" class="lang-toggle-label">
+                            <span class="lang-toggle-inner"></span>
+                            <span class="lang-toggle-switch"></span>
+                        </label>
+                        </a>
+                    </div>
                 </li> 
             </ul>
-        </nav></div>
+        </nav>
+        <div id="notification-wrapper"  style="position: relative;">
+            <i id="notification-bell" class="fa fa-bell"></i>
+            <span id="notification-count">0</span>
+            <div id="notification-list">
+                <ul id="notification-items" style="display: block;"></ul>
+            </div>
+        </div>
+        </div>
     </header>
 
      <main class="sun-content-section">
@@ -324,6 +338,15 @@ $loggedIn = isset($_SESSION['username']);
 
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <!-- <script src="script.js"></script> -->
-<script src="/galaxy/js/allhemattroi.js"></script>
+    <script src="/galaxy/js/allhemattroi.js"></script>
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+
+        <script>
+        const storedNotifications = <?php echo json_encode($notifications); ?>;
+        let notificationCount = <?php echo $unreadCount; ?>;
+        let notifications = storedNotifications;
+        const user_id = "<?php echo $_SESSION['user_id']; ?>";
+        </script>
+        <script src="/galaxy/js/noti.js"></script>
     </body>
 </html>

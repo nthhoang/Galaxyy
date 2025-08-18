@@ -5,6 +5,7 @@ $loggedIn = isset($_SESSION['username']);
 <?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; ?>
 <?php
 require_once 'db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
 
 // 1. Xác định các cột ngôn ngữ
 $title_col = ($current_lang == 'en') ? 'title_en' : 'title_vi';
@@ -88,7 +89,7 @@ $latest_news = $result_latest->fetch_all(MYSQLI_ASSOC);
 
     <link rel="stylesheet" href="/galaxy/css/header.css">
     <link rel="stylesheet" href="/galaxy/css/tintuc.css">
-
+    <link rel="stylesheet" href="/galaxy/css/noti.css">
 </head>
 <body>
     <header id="head"> 
@@ -144,6 +145,13 @@ $latest_news = $result_latest->fetch_all(MYSQLI_ASSOC);
                     </li>
                 </ul>
             </nav>
+            <div id="notification-wrapper"  style="position: relative;">
+            <i id="notification-bell" class="fa fa-bell"></i>
+            <span id="notification-count">0</span>
+            <div id="notification-list">
+                <ul id="notification-items" style="display: block;"></ul>
+            </div>
+            </div>
         </div>
     </header>
     <br><br>
@@ -295,4 +303,14 @@ $latest_news = $result_latest->fetch_all(MYSQLI_ASSOC);
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <script src="/galaxy/js/tintuc.js"></script>
+
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+
+    <script>
+        const storedNotifications = <?php echo json_encode($notifications); ?>;
+        let notificationCount = <?php echo $unreadCount; ?>;
+        let notifications = storedNotifications;
+        const user_id = "<?php echo $_SESSION['user_id']; ?>";
+    </script>
+    <script src="/galaxy/js/noti.js"></script>
 </body>

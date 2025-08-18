@@ -1,5 +1,6 @@
 <?php
 require_once 'check_admin.php';
+$user_id = $_SESSION['user_id'];
 
 if (isset($_POST['save_news'])) {
     // Lấy dữ liệu từ các trường song ngữ
@@ -41,12 +42,12 @@ if (isset($_POST['save_news'])) {
            $success = $stmt->execute();
 
     if ($success) {
-    $inserted_id = $conn->insert_id;
+    $new_id = $conn->insert_id;
     // Sau khi lưu bài thành công -> gửi thông báo
-    $message = "📰 Admin vừa đăng tin tức mới: \"$title_vi $title_en\"";
-    $sql = "INSERT INTO notifications (user_id, message, id_news) VALUES (NULL, ?, ?)";
+    $message = "Admin vừa đăng tin tức mới: \"$title_vi $title_en\"";
+    $sql = "INSERT INTO notifications (type, message, id_news) VALUES ('broadcast', ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $message, $inserted_id);  // "s" = string, "i" = integer
+    $stmt->bind_param("si", $message, $new_id);  // "s" = string, "i" = integer
     $stmt->execute();
     
     $notification_id = $conn->insert_id; 
@@ -58,7 +59,7 @@ if (isset($_POST['save_news'])) {
     $row = $result->fetch_assoc();
     $created_at = $row['created_at'];
 
-    $data = ['message' => $message, 'id' => $inserted_id, 'created_at' => $created_at];
+    $data = ['message' => $message, 'new_id' => $new_id, 'post_id' => 0, 'created_at' => $created_at, 'author_id' => $user_id];
 
     $options = [
         'http' => [

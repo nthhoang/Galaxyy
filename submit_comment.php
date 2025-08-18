@@ -4,11 +4,25 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
 
 header('Content-Type: application/json');
 
+
+error_log("Dữ liệu POST: " . print_r($_POST, true));
+error_log("Dữ liệu FILES: " . print_r($_FILES, true));
+
 // --- HÀM TẠO HTML CHO BÌNH LUẬN (ĐÃ ĐƯỢC SỬA) ---
 function generate_comment_html($comment_id, $conn, $post_id, $loggedIn) {
+$isGroup = isset($_POST['isgroup']) && (int)$_POST['isgroup'] === 1;
+
+if ($isGroup) {
+    $commentsTable = "group_comments";
+    $mediaTable = "group_comment_media";
+} else {
+    $commentsTable = "comments";
+    $mediaTable = "comment_media";
+}
+
     // SỬA LẠI CÂU SQL: Thêm "u.is_verified" để lấy trạng thái tích xanh
     $sql = "SELECT c.*, u.username, u.avatar, u.is_verified 
-            FROM group_comments c 
+            FROM {$commentsTable} c 
             JOIN users u ON c.user_id = u.id 
             WHERE c.id = ?";
     $stmt = $conn->prepare($sql);
@@ -43,7 +57,7 @@ function generate_comment_html($comment_id, $conn, $post_id, $loggedIn) {
                 
                 <?php
                 // Phần hiển thị media giữ nguyên
-                $stmt_media = $conn->prepare("SELECT file_path, media_type FROM group_comment_media WHERE comment_id = ?");
+                $stmt_media = $conn->prepare("SELECT file_path, media_type FROM {$mediaTable} WHERE comment_id = ?");
                 $stmt_media->bind_param("i", $comment['id']);
                 $stmt_media->execute();
                 $result_media = $stmt_media->get_result();
@@ -69,6 +83,9 @@ function generate_comment_html($comment_id, $conn, $post_id, $loggedIn) {
             <form action="submit_comment.php" method="POST" enctype="multipart/form-data" class="comment-submission-form">
                 <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
                 <input type="hidden" name="parent_id" value="<?php echo $comment['id']; ?>">
+                  <?php if (!empty($isGroup) && $isGroup == 1): ?>
+                <input type="hidden" name="isgroup" value="1">
+            <?php endif; ?>
                 <div class="comment-input-area">
                     <textarea name="content" rows="1" placeholder="Viết câu trả lời..." class="form-control"></textarea>
                     <label class="file-upload-label" title="Thêm media"><i class="fas fa-paperclip"></i></label>
@@ -101,13 +118,24 @@ $post_id = isset($_POST['post_id']) ? (int)$_POST['post_id'] : 0;
 $parent_id = isset($_POST['parent_id']) && !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : NULL;
 $content = isset($_POST['content']) ? trim($_POST['content']) : '';
 $has_files = isset($_FILES['media']) && !empty($_FILES['media']['name'][0]);
+$isGroup = isset($_POST['isgroup']) && (int)$_POST['isgroup'] === 1;
 if (empty($content) && !$has_files) {
     echo json_encode(['success' => false, 'message' => 'Nội dung không được để trống.']);
     exit();
 }
+
+
+if ($isGroup) {
+    $commentsTable = "group_comments";
+    $mediaTable = "group_comment_media";
+} else {
+    $commentsTable = "comments";
+    $mediaTable = "comment_media";
+}
+
 $conn->begin_transaction();
 try {
-    $stmt_comment = $conn->prepare("INSERT INTO group_comments (post_id, user_id, parent_id, content) VALUES (?, ?, ?, ?)");
+    $stmt_comment = $conn->prepare("INSERT INTO {$commentsTable} (post_id, user_id, parent_id, content) VALUES (?, ?, ?, ?)");
     $stmt_comment->bind_param("iiis", $post_id, $user_id, $parent_id, $content);
     $stmt_comment->execute();
     $comment_id = $conn->insert_id;
@@ -129,7 +157,7 @@ try {
                     $destination_path = $upload_dir . $new_file_name;
                     if (move_uploaded_file($file_tmp_path, $destination_path)) {
                         $file_path_db = '/galaxy/uploads/comments/' . $new_file_name;
-                        $stmt_media = $conn->prepare("INSERT INTO group_comment_media (comment_id, file_path, media_type) VALUES (?, ?, ?)");
+                        $stmt_media = $conn->prepare("INSERT INTO {$mediaTable} (comment_id, file_path, media_type) VALUES (?, ?, ?)");
                         $stmt_media->bind_param("iss", $comment_id, $file_path_db, $media_type);
                         $stmt_media->execute();
                         $stmt_media->close();

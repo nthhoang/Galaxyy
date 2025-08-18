@@ -59,24 +59,53 @@ const app = express();
 app.use(express.json()); // Cho phép nhận body dạng JSON
 
 // Endpoint để PHP gọi gửi thông báo
-app.post("/notify", (req, res) => {
-  const { message, id, created_at } = req.body;
+app.post("/notify", async (req, res) => {
+  const { message, new_id, post_id, created_at, author_id } = req.body;
 
-  
-  for (let user_id in users) {
-    io.to(users[user_id]).emit("receive_notification", {
-      type: "new_article",
-      id,
-      message,
-      created_at
-    });
+  let target_users = [];
+
+  if (post_id != 0) {
+    target_users = await getFollowersOfUser(author_id);
+  } else {
+    target_users = Object.keys(users);
   }
 
-  res.send({ success: true });
+  for (let user_id of target_users) {
+    if (users[user_id]) {
+      io.to(users[user_id]).emit("receive_notification", {
+        type: "notification",
+        new_id,
+        post_id,
+        message,
+        created_at
+      });
+    }
+  }
+
+  res.json({ success: true, sent_to: target_users.length });
 });
+
 
 // Mở cổng API riêng (khác với socket)
 app.listen(4000, () => {
   console.log("API server đang chạy tại http://localhost:4000");
 });
+
+const qs = require('qs');
+const axios = require('axios');
+async function getFollowersOfUser(author_id) {
+  try {
+    const response = await axios.post(
+      'http://localhost/galaxy/get_followers.php',
+      qs.stringify({ author_id: author_id }),  // <-- gửi đúng kiểu form
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+    return response.data.followers;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách followers:", error);
+    return [];
+  }
+}
+
+
 

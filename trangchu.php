@@ -4,42 +4,8 @@ $loggedIn = isset($_SESSION['username']);
 ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
 ?>
-
-<?php
-
-$user_id = $_SESSION['user_id'];
-
-$sql = "SELECT * FROM notifications WHERE user_id = ? OR user_id IS NULL ORDER BY created_at DESC";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-
-$result = $stmt->get_result();
-$notifications = $result->fetch_all(MYSQLI_ASSOC);
-
-
-$sql = "SELECT COUNT(*) AS unread_count
-        FROM notifications n
-        WHERE 
-            (n.user_id IS NULL OR n.user_id = ?)
-            AND NOT EXISTS (
-                SELECT 1
-                FROM notification_user nu
-                WHERE nu.notification_id = n.id
-                  AND nu.user_id = ?
-            )";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $user_id, $user_id);
-$stmt->execute();
-
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$unreadCount = $row['unread_count'];
-
-?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -57,78 +23,10 @@ $unreadCount = $row['unread_count'];
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/galaxy/css/header.css">
     <link rel="stylesheet" href="/galaxy/css/trangchu.css">
+    <link rel="stylesheet" href="/galaxy/css/noti.css">
  
      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
-    <style>
-    #notification-bell {
-  position: relative;
-  cursor: pointer;
-  font-size: 34px;
-}
-
-#notification-count {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  background: red;
-  color: white;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 50%;
-  display: none;
-}
-
-#notification-list {
-  position: absolute;
-  top: 60px;
-  right: 0;
-  width: 320px;
-  max-height: 400px;
-  overflow-y: auto;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  display: none;
-  z-index: 999;
-}
-
-#notification-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#notification-items li {
-  display: block !important;     /* ✅ Rất quan trọng để xuống dòng */
-  padding: 10px 15px;
-  border-bottom: 1px solid #eee;
-  white-space: normal;
-  word-break: break-word;
-  font-size: 14px;
-}
-
-#notification-items li a {
-  color:cadetblue;
-  text-decoration-line: none;
-}
-
-#notification-items li a:hover {
-  color:darkolivegreen;
-}
-
-#notification-items li i {
-  margin-right: 8px;
-  color: #666;
-}
-
-#notification-items li .time_up{
-  font-size: small;
-  color:cornflowerblue;
-}
-
-    </style>
 <body>
    
   <header id="head"> 
@@ -216,101 +114,17 @@ $unreadCount = $row['unread_count'];
         ?>
     </main>
 
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- <script src="script.js"></script> -->
-     <script src="/galaxy/js/trangchu.js"></script>
-    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
-   <script>
-  const storedNotifications = <?php echo json_encode($notifications); ?>;
-  let notificationCount = <?php echo $unreadCount; ?>;
-  let notifications = storedNotifications;
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="/galaxy/js/trangchu.js"></script>
+  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
 
-
-    <script>
-
-const socket = io("http://localhost:3000");
-const user_id = "<?php echo $_SESSION['user_id']; ?>";
-socket.emit("register", user_id);
-// Hiển thị ban đầu từ DB
-updateNotificationUI();
-
-// Khi nhận thông báo real-time từ socket
-socket.on("receive_notification", (data) => {
-  if (data.type === "new_article") {
-    notificationCount++;
-    notifications.unshift({
-  id_news: data.id,
-  message: data.message,
-  created_at: data.created_at
-});// push vào đầu danh sách
-    updateNotificationUI();
-}
-});
-
-// Render toàn bộ thông báo
-function updateNotificationUI() {
-  const countElem = document.getElementById("notification-count");
-  const listElem = document.getElementById("notification-items");
-
-  countElem.innerText = notificationCount;
-  countElem.style.display = notificationCount > 0 ? "inline-block" : "none";
-
-  listElem.innerHTML = "";
-  notifications.forEach(n => {
-    const li = document.createElement("li");
-    const createdAt = n.created_at;
-    const timeString = timeAgo(createdAt);
-    li.innerHTML = `<a href="view_news.php?id=${n.id_news}"> <i class="fa fa-newspaper-o"></i> ${n.message} </a><br> <p class="time_up">Đăng lúc: ${timeString}</p>`;
-    if (n.is_read == 0) {
-      li.style.fontWeight = "bold"; // thông báo chưa đọc in đậm
-    }
-    listElem.appendChild(li);
-  });
-}
-
-
-
-document.getElementById("notification-bell").addEventListener("click", () => {
-  const list = document.getElementById("notification-list");
-
-  if (list.style.display === "none") {
-    list.style.display = "block";
-
-    // Gửi AJAX đánh dấu đã đọc
-    fetch("read_notifications.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: user_id })
-    });
-
-    notificationCount = 0;
-    document.getElementById("notification-count").style.display = "none";
-
-    // Đánh dấu trên giao diện (không cần reload)
-    notifications = notifications.map(n => ({ ...n, is_read: 1 }));
-    updateNotificationUI();
-
-  } else {
-    list.style.display = "none";
-  }
-});
-
-function timeAgo(datetime) {
-  const seconds = Math.floor((new Date() - new Date(datetime)) / 1000);
-
-  if (seconds < 60) return seconds + " giây trước";
-  if (seconds < 3600) return Math.floor(seconds / 60) + " phút trước";
-  if (seconds < 86400) return Math.floor(seconds / 3600) + " giờ trước";
-  if (seconds < 2592000) return Math.floor(seconds / 86400) + " ngày trước";
-  if (seconds < 31104000) return Math.floor(seconds / 2592000) + " tháng trước";
-
-  return Math.floor(seconds / 31104000) + " năm trước";
-}
-
-</script>
-
-
+  <script>
+    const storedNotifications = <?php echo json_encode($notifications); ?>;
+    let notificationCount = <?php echo $unreadCount; ?>;
+    let notifications = storedNotifications;
+    const user_id = "<?php echo $_SESSION['user_id']; ?>";
+  </script>
+  <script src="/galaxy/js/noti.js"></script>
 
 </body>
 </html>

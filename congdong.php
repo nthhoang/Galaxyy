@@ -97,55 +97,59 @@
     <div class="main-body">
         <main class="container mt-4">
             <div class="row">
-                  <!-- Cột trái: người nổi bật nhóm nổi bật -->
+                <!-- Cột trái: người nổi bật + nhóm nổi bật cùng một khối sticky -->
                 <div class="col-md-4">
-                    <div class="card shadow-sm mb-4 sticky-top" style="top: 100px; z-index: 1000;">
-                        <div class="card-header bg-primary text-white"><i class="fas fa-fire"></i> Người nổi bật</div>
-                        <ul class="list-group list-group-flush">
-                        <?php
-                            $stmt_top_users = $conn->query("SELECT id, username, avatar, view FROM users ORDER BY view DESC LIMIT 5");
-                            while ($u = $stmt_top_users->fetch_assoc()) {
-                                $avatar = !empty($u['avatar']) ? htmlspecialchars($u['avatar']) : '/galaxy/images-icon/default_avatar.png';
-                                echo '<li class="list-group-item d-flex align-items-center">';
-                                echo '  <img src="'. $avatar .'" class="rounded-circle me-2" width="40" height="40" alt="Avatar">';
-                                echo '  <div>';
-                                echo '    <a href="trangcanhan.php?user_id=' . $u['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($u['username']) . '</strong></a><br>';
-                                echo '  </div>';
-                                echo '</li>';
-                            }
-                        ?>
-                        </ul>
-                    </div>
-
-                    <!-- Nhóm nổi bật -->
-                    <div class="card shadow-sm mb-4 sticky-top" style="top: 450px; z-index: 1000;">
-                        <div class="card-header bg-success text-white"><i class="fas fa-users"></i> Nhóm nổi bật</div>
-                        <ul class="list-group list-group-flush">
+                    <div class="sticky-top" style="top: 100px; z-index: 1000;">
+                        
+                        <!-- Người nổi bật -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-primary text-white"><i class="fas fa-fire"></i> Người nổi bật</div>
+                            <ul class="list-group list-group-flush">
                             <?php
-                            $stmt_top_groups = $conn->query("
-                                SELECT g.id, g.name, g.cover_image, COUNT(gm.user_id) AS member_count
-                                FROM groups g
-                                LEFT JOIN group_members gm ON g.id = gm.group_id
-                                GROUP BY g.id
-                                ORDER BY member_count DESC
-                                LIMIT 3
-                            ");
-
-                            while ($g = $stmt_top_groups->fetch_assoc()) {
-                                $cover = !empty($g['cover_image']) ? htmlspecialchars($g['cover_image']) : '/galaxy/images-icon/default_group.png';
-                                echo '<li class="list-group-item d-flex align-items-center">';
-                                echo '  <img src="' . $cover . '" class="rounded me-2" width="40" height="40" style="object-fit: cover;" alt="Group Cover">';
-                                echo '  <div>';
-                                echo '    <a href="nhom.php?group_id=' . $g['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($g['name']) . '</strong></a><br>';
-                                echo '    <small>' . $g['member_count'] . ' thành viên</small>';
-                                echo '  </div>';
-                                echo '</li>';
-                            }
+                                $stmt_top_users = $conn->query("SELECT id, username, avatar, view FROM users ORDER BY view DESC LIMIT 5");
+                                while ($u = $stmt_top_users->fetch_assoc()) {
+                                    $avatar = !empty($u['avatar']) ? htmlspecialchars($u['avatar']) : '/galaxy/images-icon/default_avatar.png';
+                                    echo '<li class="list-group-item d-flex align-items-center">';
+                                    echo '  <img src="'. $avatar .'" class="rounded-circle me-2" width="40" height="40" alt="Avatar">';
+                                    echo '  <div>';
+                                    echo '    <a href="trangcanhan.php?user_id=' . $u['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($u['username']) . '</strong></a><br>';
+                                    echo '  </div>';
+                                    echo '</li>';
+                                }
                             ?>
-                        </ul>
-                    </div>
+                            </ul>
+                        </div>
 
+                        <!-- Nhóm nổi bật -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-success text-white"><i class="fas fa-users"></i> Nhóm nổi bật</div>
+                            <ul class="list-group list-group-flush">
+                                <?php
+                                $stmt_top_groups = $conn->query("
+                                    SELECT g.id, g.name, g.cover_image, COUNT(gm.user_id) AS member_count
+                                    FROM groups g
+                                    LEFT JOIN group_members gm ON g.id = gm.group_id
+                                    GROUP BY g.id
+                                    ORDER BY member_count DESC
+                                    LIMIT 3
+                                ");
+                                while ($g = $stmt_top_groups->fetch_assoc()) {
+                                    $cover = !empty($g['cover_image']) ? htmlspecialchars($g['cover_image']) : '/galaxy/images-icon/default_group.png';
+                                    echo '<li class="list-group-item d-flex align-items-center">';
+                                    echo '  <img src="' . $cover . '" class="rounded me-2" width="40" height="40" style="object-fit: cover;" alt="Group Cover">';
+                                    echo '  <div>';
+                                    echo '    <a href="nhom.php?group_id=' . $g['id'] . '" style="text-decoration: none;"><strong>' . htmlspecialchars($g['name']) . '</strong></a><br>';
+                                    echo '    <small>' . $g['member_count'] . ' thành viên</small>';
+                                    echo '  </div>';
+                                    echo '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+
+                    </div> <!-- Kết thúc sticky-top -->
                 </div>
+
 
                 
                 <!-- Cột phải: phần đăng bài và post feed -->

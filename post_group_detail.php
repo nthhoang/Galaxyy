@@ -91,6 +91,7 @@
                     echo '<div class="reply-form" id="reply-form-'.$comment['id'].'" style="display:none;">';
                     echo '  <form action="submit_comment.php" method="POST" enctype="multipart/form-data" class="comment-submission-form">';
                     echo '      <input type="hidden" name="post_id" value="'.$post_id.'">';
+                    echo '     <input type="hidden" name="isgroup" value="1">';
                     echo '      <input type="hidden" name="parent_id" value="'.$comment['id'].'">';
                     echo '      <div class="comment-input-area">';
                     echo '          <textarea name="content" rows="1" placeholder="' . htmlspecialchars(t('congdong-15')) . '" class="form-control"></textarea>';
@@ -221,10 +222,11 @@
                  data-text-error-generic="<?= htmlspecialchars(t('error-generic')) ?>">
                 
                 <h3 class="text-white mb-3" id="comment-count"><?php echo $total_comments; ?> <?= htmlspecialchars(t('congdong-11')) ?></h3>
-                <?php if ($loggedIn): ?>
+               <?php if ($loggedIn): ?>
                 <div class="comment-form">
                     <form action="submit_comment.php" method="POST" enctype="multipart/form-data" class="comment-submission-form">
-                        <input type="hidden" name="post_id" value="<?php echo $post_id; ?>"> 
+                        <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post_id); ?>">
+                        <input type="hidden" name="isgroup" value="1"> <!-- Thêm dòng này -->
                         <div class="comment-input-area">
                             <textarea name="content" rows="1" placeholder="<?= htmlspecialchars(t('congdong-13')) ?>"></textarea>
                             <label class="file-upload-label" title="Thêm media"><i class="fas fa-paperclip"></i></label>
@@ -235,7 +237,6 @@
                     </form>
                 </div>
                 <?php endif; ?>
-
                 <div class="comment-list">
                     <?php
                         if (!empty($comments_by_parent[NULL])) {
