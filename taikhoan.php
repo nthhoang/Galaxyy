@@ -48,7 +48,7 @@ if ($stmt) {
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/galaxy/css/header.css">
-        <link rel="stylesheet" href="/galaxy/css/taikhoan.css">
+    <link rel="stylesheet" href="/galaxy/css/taikhoan.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,9 +169,27 @@ if ($stmt) {
                     <div class="content-header"><h2><?= t('taikhoan-8') ?></h2></div>
                     <form id="change-password-form">
                         <div class="info-grid-v2">
-                            <div class="info-item-v2"><label class="info-label-v2"><?= t('taikhoan-9') ?></label><input type="password" name="old_password" class="edit-input-v2" required></div>
-                            <div class="info-item-v2"><label class="info-label-v2"><?= t('taikhoan-10') ?></label><input type="password" name="new_password" class="edit-input-v2" required minlength="8"></div>
-                            <div class="info-item-v2"><label class="info-label-v2"><?= t('taikhoan-11') ?></label><input type="password" name="confirm_password" class="edit-input-v2" required></div>
+                            <div class="info-item-v2">
+                                <label class="info-label-v2"><?= t('taikhoan-9') ?></label>
+                                <div class="password-wrapper">
+                                    <input type="password" name="old_password" class="edit-input-v2" required>
+                                    <i class="fas fa-eye toggle-password"></i>
+                                </div>
+                            </div>
+                            <div class="info-item-v2">
+                                <label class="info-label-v2"><?= t('taikhoan-10') ?></label>
+                                <div class="password-wrapper">
+                                    <input type="password" name="new_password" class="edit-input-v2" required minlength="8">
+                                    <i class="fas fa-eye toggle-password"></i>
+                                </div>
+                            </div>
+                            <div class="info-item-v2">
+                                <label class="info-label-v2"><?= t('taikhoan-11') ?></label>
+                                <div class="password-wrapper">
+                                    <input type="password" name="confirm_password" class="edit-input-v2" required>
+                                    <i class="fas fa-eye toggle-password"></i>
+                                </div>
+                            </div>
                         </div><br>
                         <button type="submit" class="action-btn-v2 btn-save"><i class="fas fa-key"></i><?= t('taikhoan-12') ?></button>
                     </form>

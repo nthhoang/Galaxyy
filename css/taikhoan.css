@@ -157,3 +157,24 @@ body {
 .edit-input-v2 { width: 100%; padding: 8px 10px; background-color: rgba(15, 23, 42, 0.8); border: 1px solid var(--profile-border-color); color: var(--dash-text-primary); border-radius: 6px; font-size: 1rem; margin-top: 4px; }
 .edit-input-v2:focus { outline: none; border-color: var(--dash-accent); background-color: #0f172a; }
 @media (max-width: 992px) { .profile-dashboard { flex-direction: column; } .dashboard-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--dash-glass-border); } }
+/* css cho con mắt mật khẩu */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 35px; /* chừa chỗ cho icon */
+}
+
+.password-wrapper .toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    color: #888;
+}
+.password-wrapper .toggle-password:hover {
+    color: #333;
+}
