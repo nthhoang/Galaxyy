@@ -8,6 +8,7 @@
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php';
     require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
     $loggedIn = true;
     $current_user_id = $_SESSION['user_id'];
 
@@ -32,18 +33,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/congdong.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/galaxy/css/noti.css">
 </head>
 <body>
-     <header id="head"> 
+    <header id="head"> 
         <div class="logo-container">
-            <img src="images-icon/logo3.png" alt="logonhom" class="logo-overlay">
+            <img src="/galaxy/images-icon/logo3.png" alt="logonhom" class="logo-overlay">
         </div>
         <div id="menuhead">
             <nav>
                 <button id="menu-toggle" aria-label="Mở menu">☰</button>
                 <ul id="main-menu">
-                    <li><a href="trangchu.php" ><img src="/galaxy/images-icon/home.png" alt=""><?= t('1') ?></a></li>
+                    <li><a href="trangchu.php"><img src="/galaxy/images-icon/home.png" alt=""><?= t('1') ?></a></li>
                     <li class="dropdown">
                         <a href="#"><img src="/galaxy/images-icon/hemattroi.png" alt=""><?= t('2') ?></a>
                         <div class="dropdown-content">
@@ -62,11 +64,11 @@
                     <li class="dropdown">
                         <a href="#"><img src="/galaxy/images-icon/black-hole.png" alt=""><?= t('3') ?></a>
                         <div class="dropdown-content">
-                             <a class="item" href="vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
+                            <a class="item" href="vutru.php"><img src="/galaxy/images-icon/vutru.png" alt=""><?= t('3,3') ?> </a>
                             <a class="item" href="sukien.php"><img src="/galaxy/images-icon/sukien.png" alt=""><?= t('3,1') ?> </a>
                             <a class="item" href="tintuc.php"><img src="/galaxy/images-icon/news.png" alt=""><?= t('3,2') ?> </a>
                         </div>
-                    </li> 
+                    </li>
                     <li><a href="congdong.php" class="active"><img src="/galaxy/images-icon/group (1).png" alt=""><?= t('4') ?></a></li>
                     <li>
                         <a href="<?php echo $loggedIn ? 'taikhoan.php' : './TAIKHOAN/login-register.html'; ?>">
@@ -78,19 +80,23 @@
                         <div class="dropdown-content" style="left: -170%">
                             <a class="item" href="vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
                             <a class="language-switcher-container">
-                                <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"
-                                    <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>
-                                >
-                                
+                                <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox" <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>>
                                 <label for="lang-toggle" class="lang-toggle-label">
                                     <span class="lang-toggle-inner"></span>
                                     <span class="lang-toggle-switch"></span>
                                 </label>
                             </a>
                         </div>
-                    </li> 
+                    </li>
                 </ul>
             </nav>
+            <div id="notification-wrapper"  style="position: relative;">
+            <i id="notification-bell" class="fa fa-bell"></i>
+            <span id="notification-count">0</span>
+            <div id="notification-list">
+                <ul id="notification-items" style="display: block;"></ul>
+            </div>
+            </div>
         </div>
     </header>
 
@@ -309,6 +315,14 @@
     </div>
 
 <script src="/galaxy/js/congdong.js"></script>
+<script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
 
+    <script>
+        const storedNotifications = <?php echo json_encode($notifications); ?>;
+        let notificationCount = <?php echo $unreadCount; ?>;
+        let notifications = storedNotifications;
+        const user_id = "<?php echo $_SESSION['user_id']; ?>";
+    </script>
+    <script src="/galaxy/js/noti.js"></script>
 </body>
 </html>

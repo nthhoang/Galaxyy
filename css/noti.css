@@ -1,7 +1,10 @@
 #notification-bell {
+  display: block !important;
+  z-index: 1000000;
   position: relative;
   cursor: pointer;
   font-size: 34px;
+  color: #ffffff;
 }
 
 #notification-count {
