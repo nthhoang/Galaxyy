@@ -81,7 +81,19 @@ if ($is_edit) {
             <input type="hidden" name="current_image" value="<?= htmlspecialchars($image_url) ?>">
         <?php endif; ?>
     </div>
+
+    <div class="form-group">
+    <label>Vị trí sự kiện</label>
+    <div id="map" style="height: 400px;"></div>
+
+    <!-- Input ẩn để lưu vào DB -->
+    <input type="hidden" name="latitude" id="latitude" value="">
+    <input type="hidden" name="longitude" id="longitude" value="">
+    <input type="hidden" name="place_name" id="place_name" value="">
     
+    <p class="mt-2"><strong>Địa điểm chọn:</strong> <span id="place_display">Chưa chọn</span></p>
+    </div>
+
     <button type="submit" name="save_event" class="btn btn-primary mt-3">Lưu Sự kiện</button>
 </form>
 
@@ -97,6 +109,71 @@ if ($is_edit) {
     plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
   });
+
+  // Load Leaflet map
+var map = L.map('map').setView([15.8794, 108.3350], 13); // Hội An
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Nếu đang edit, đặt marker sẵn
+<?php if ($is_edit && !empty($event['latitude']) && !empty($event['longitude'])): ?>
+    var marker = L.marker([<?= $event['latitude'] ?>, <?= $event['longitude'] ?>], {draggable:true}).addTo(map);
+    map.setView([<?= $event['latitude'] ?>, <?= $event['longitude'] ?>], 15);
+
+    document.getElementById('latitude').value = "<?= $event['latitude'] ?>";
+    document.getElementById('longitude').value = "<?= $event['longitude'] ?>";
+    document.getElementById('place_name').value = "<?= addslashes($event['place_name'] ?? '') ?>";
+    document.getElementById('place_display').innerText = "<?= addslashes($event['place_name'] ?? '') ?>";
+<?php else: ?>
+    var marker = null;
+<?php endif; ?>
+
+// Hàm reverse geocode (lấy tên địa điểm từ lat/lng)
+function getPlaceName(lat, lng) {
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+    .then(response => response.json())
+    .then(data => {
+        let displayName = data.display_name || "Không rõ địa điểm";
+        document.getElementById('place_name').value = displayName;
+        document.getElementById('place_display').innerText = displayName;
+    })
+    .catch(err => {
+        console.error(err);
+    });
+}
+
+// Bắt sự kiện click trên map
+map.on('click', function(e) {
+    var lat = e.latlng.lat.toFixed(6);
+    var lng = e.latlng.lng.toFixed(6);
+
+    if (marker) {
+        marker.setLatLng([lat, lng]);
+    } else {
+        marker = L.marker([lat, lng], {draggable:true}).addTo(map);
+    }
+
+    // Lưu vào input hidden
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+
+    // Lấy tên địa điểm
+    getPlaceName(lat, lng);
+
+    // Cho phép kéo marker thay đổi vị trí
+    marker.on('dragend', function(e) {
+        var pos = e.target.getLatLng();
+        var newLat = pos.lat.toFixed(6);
+        var newLng = pos.lng.toFixed(6);
+        document.getElementById('latitude').value = newLat;
+        document.getElementById('longitude').value = newLng;
+        getPlaceName(newLat, newLng);
+    });
+});
+
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIDzMLgEKa2qqLaHZ7wxz0B4ohn3RW3b0&callback=initMap" async defer></script>
 
 <?php include 'footer.php'; ?>

@@ -7,6 +7,9 @@ if (isset($_POST['save_event'])) {
     $content_vi = $_POST['content_vi'];
     $title_en = $_POST['title_en'];
     $content_en = $_POST['content_en'];
+    $latitude   = $_POST['latitude'] ?? null;
+    $longitude  = $_POST['longitude'] ?? null;
+    $place_name = $_POST['place_name'] ?? null;
     
     // Các trường chung
     $event_date = !empty($_POST['event_date']) ? $_POST['event_date'] : null;
@@ -33,11 +36,32 @@ if (isset($_POST['save_event'])) {
 
     if (isset($_POST['id'])) { // SỬA
         $id = (int)$_POST['id'];
-        $stmt = $conn->prepare("UPDATE events SET title_vi=?, content_vi=?, title_en=?, content_en=?, event_date=?, image_url=? WHERE id=?");
-        $stmt->bind_param("ssssssi", $title_vi, $content_vi, $title_en, $content_en, $event_date, $image_url, $id);
+        $stmt = $conn->prepare("UPDATE events SET title_vi=?, content_vi=?, title_en=?, content_en=?, event_date=?, image_url=?, latitude=?, longitude=?, place_name=? WHERE id=?");
+    $stmt->bind_param("ssssssdssi", 
+        $title_vi, 
+        $content_vi, 
+        $title_en, 
+        $content_en, 
+        $event_date, 
+        $image_url, 
+        $latitude, 
+        $longitude, 
+        $place_name, 
+        $id
+    );
     } else { // THÊM
-        $stmt = $conn->prepare("INSERT INTO events (title_vi, content_vi, title_en, content_en, event_date, image_url) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $title_vi, $content_vi, $title_en, $content_en, $event_date, $image_url);
+       $stmt = $conn->prepare("INSERT INTO events (title_vi, content_vi, title_en, content_en, event_date, image_url, latitude, longitude, place_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+       $stmt->bind_param("ssssssdss", 
+        $title_vi, 
+        $content_vi, 
+        $title_en, 
+        $content_en, 
+        $event_date, 
+        $image_url, 
+        $latitude, 
+        $longitude, 
+        $place_name
+    );
     }
     
     if ($stmt->execute()) {

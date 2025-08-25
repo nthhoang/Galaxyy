@@ -24,18 +24,29 @@
 
         .event-card {
             background-color: #1e293b;
-            border: 0;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            color: #fff;         /* chữ trắng toàn card */
         }
-        .event-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+
+        .event-card .event-date,
+        .event-card .event-place {
+            color: #ffd700; /* vàng nhạt để nổi bật */
         }
-        .event-card-img { height: 200px; object-fit: cover; }
-        .event-card .card-body { border-top: 3px solid #fbbf24; }
-        .event-card .card-title { color: #fef3c7; font-weight: 500; }
-        .event-card .card-text { color: #cbd5e1; }
-        .event-card .btn-custom { background-color: transparent; border: 1px solid #fbbf24; color: #fbbf24; }
-        .event-card .btn-custom:hover { background-color: #fbbf24; color: #1e293b; }
+
+        .card-title {
+        font-size: 16px;
+        font-weight: bold;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* số dòng muốn hiển thị */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        }
+
+        .card-location {
+        font-size: 14px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1; /* chỉ cho 1 dòng */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        }
+
+        

@@ -21,16 +21,32 @@ if (!isset($_SESSION['user_id'])) {
     $stmt_user_avatar->close();
 
 // 1. Nhóm của bạn
-$stmt = $conn->prepare("SELECT * FROM groups WHERE created_by = ? ORDER BY created_at DESC");
+$stmt = $conn->prepare("
+    SELECT 
+        g.*, 
+        COUNT(gm.user_id) AS member_count 
+    FROM groups g
+    LEFT JOIN group_members gm ON g.id = gm.group_id
+    WHERE g.created_by = ?
+    GROUP BY g.id
+    ORDER BY g.created_at DESC
+");
 $stmt->bind_param("i", $current_user_id);
 $stmt->execute();
 $my_groups = $stmt->get_result();
 
 // 2. Nhóm đã tham gia (trừ nhóm do mình tạo)
 $stmt = $conn->prepare("
-    SELECT g.* FROM group_members gm 
-    JOIN groups g ON gm.group_id = g.id 
-    WHERE gm.user_id = ? AND g.created_by != ?
+    SELECT 
+        g.*, 
+        COUNT(gm.user_id) AS member_count
+    FROM groups g
+    LEFT JOIN group_members gm ON g.id = gm.group_id
+    WHERE g.id IN (
+        SELECT group_id FROM group_members WHERE user_id = ?
+    )
+    AND g.created_by != ?
+    GROUP BY g.id
     ORDER BY g.created_at DESC
 ");
 $stmt->bind_param("ii", $current_user_id, $current_user_id);
@@ -39,19 +55,50 @@ $joined_groups = $stmt->get_result();
 
 // 3. Gợi ý nhóm (không tạo và chưa tham gia)
 $stmt = $conn->prepare("
-    SELECT * FROM groups 
-    WHERE id NOT IN (
+    SELECT 
+        g.*, 
+        COUNT(gm.user_id) AS member_count
+    FROM groups g
+    LEFT JOIN group_members gm ON g.id = gm.group_id
+    WHERE g.id NOT IN (
         SELECT group_id FROM group_members WHERE user_id = ?
-        UNION
-        SELECT id FROM groups WHERE created_by = ?
     )
-    ORDER BY created_at DESC
+    AND g.created_by != ?
+    GROUP BY g.id
+    ORDER BY RAND() -- Sắp xếp ngẫu nhiên để gợi ý đa dạng hơn
+    LIMIT 10 -- Giới hạn số lượng gợi ý
 ");
 $stmt->bind_param("ii", $current_user_id, $current_user_id);
 $stmt->execute();
 $suggested_groups = $stmt->get_result();
 
+// Hàm để render một mục trong danh sách nhóm
+function render_group_item($group, $type = 'suggested') {
+    // Giả sử bạn có cột member_count trong CSDL, nếu không có thể bỏ qua
+    $member_count = isset($group['member_count']) ? $group['member_count'] . ' thành viên' : '';
+
+    // Tạo placeholder nếu không có ảnh bìa
+    $cover_image_html = '<div class="me-3 rounded-circle group-avatar-placeholder"></div>';
+    if (!empty($group['cover_image'])) {
+        $cover_image_html = '<img src="' . htmlspecialchars($group['cover_image']) . '" alt="cover" class="me-3 rounded-circle group-avatar">';
+    }
+    ?>
+
+    <li class="list-group-item list-group-item-action d-flex align-items-center p-2">
+        <a href="?group_id=<?= $group['id'] ?>" class="d-flex align-items-center text-dark text-decoration-none flex-grow-1 group-info">
+            <?= $cover_image_html ?>
+            <div class="d-flex flex-column">
+                <span class="fw-bold"><?= htmlspecialchars($group['name']) ?></span>
+                <?php if ($member_count): ?>
+                    <small class="text-muted"><?= $member_count ?></small>
+                <?php endif; ?>
+            </div>
+        </a>
+    </li>
+    <?php
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -67,6 +114,91 @@ $suggested_groups = $stmt->get_result();
     <link rel="stylesheet" href="/galaxy/css/congdong.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <style>
+    .card-body .list-group-item {
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0; /* Bỏ bo tròn góc của item */
+    }
+    /* Xóa viền trên của item đầu tiên */
+    .card-body .list-group-item:first-child {
+        border-top: 0;
+    }
+    /* Xóa viền dưới của item cuối cùng */
+     .card-body .list-group-item:last-child {
+        border-bottom: 0;
+    }
+    .group-list .list-group-item {
+        /* Thêm một đường viền dưới nhẹ nhàng hơn viền mặc định */
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .group-list .list-group-item:last-child {
+        border-bottom: none;
+    }
+    
+    .group-avatar {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+    }
+
+    .group-avatar-placeholder {
+        width: 45px;
+        height: 45px;
+        background-color: #e9ecef; /* Màu xám nhạt */
+    }
+
+    .group-info {
+        /* Đảm bảo tên nhóm không bị tràn nếu quá dài */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 2000px; /* Điều chỉnh kích thước tối đa của carousel */
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.carousel-slides {
+    display: flex;
+    animation: slide-animation 15s infinite; /* Tốc độ di chuyển: 15 giây */
+}
+
+.carousel-img {
+    width: 100%;
+    flex-shrink: 0; /* Ngăn hình ảnh bị co lại */
+    object-fit: cover;
+}
+
+.carousel-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff; /* Chữ màu trắng */
+    text-shadow: 
+        1px 1px 2px #000, 
+        0 0 1em #2196F3, /* Tạo bóng xanh nhạt */
+        0 0 0.2em #2196F3; /* Làm bóng rõ hơn */
+    font-size: 2.5em; /* Kích thước chữ to hơn */
+    font-weight: bold; /* Chữ in đậm */
+    font-family: 'Arial', sans-serif; /* Chọn font chữ dễ đọc */
+}
+
+@keyframes slide-animation {
+    0% { transform: translateX(0%); }
+    25% { transform: translateX(-100%); } /* Hình 1 -> 2 */
+    50% { transform: translateX(-200%); } /* Hình 2 -> 3 */
+    75% { transform: translateX(-300%); } /* Hình 3 -> 4 */
+    100% { transform: translateX(-400%); } /* Quay lại hình đầu tiên */
+}
+</style>
 </head>
 <body>
     <header id="head"> 
@@ -136,86 +268,83 @@ $suggested_groups = $stmt->get_result();
     <div class="row">
         <!-- Danh sách nhóm bên trái -->
         <div class="col-md-4">
-            <h4 class="mb-3">Tất cả nhóm</h4>
-            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalTaoNhom">+ Tạo nhóm</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Tất cả nhóm</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTaoNhom">+ Tạo nhóm</button>
+    </div>
 
-            <!-- Nhóm của bạn -->
-            <h6 class="text-success">Nhóm của bạn</h6>
-            <ul class="list-group mb-3">
+    <?php if ($my_groups->num_rows > 0): ?>
+        <div class="card mb-3">
+            <div class="card-header bg-white">
+                <h6 class="text-success mb-0">Nhóm của bạn</h6>
+            </div>
+            <ul class="list-group list-group-flush">
                 <?php while ($group = $my_groups->fetch_assoc()): ?>
-                    <li class="list-group-item d-flex align-items-center">
-                        <?php if (!empty($group['cover_image'])): ?>
-                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                        <?php else: ?>
-                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
-                        <?php endif; ?>
-                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
-                    </li>
-                <?php endwhile; ?>
-            </ul>
-
-            <!-- Nhóm đã tham gia -->
-            <h6 class="text-primary">Nhóm đã tham gia</h6>
-            <ul class="list-group mb-3">
-                <?php while ($group = $joined_groups->fetch_assoc()): ?>
-                    <li class="list-group-item d-flex align-items-center">
-                        <?php if (!empty($group['cover_image'])): ?>
-                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                        <?php else: ?>
-                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
-                        <?php endif; ?>
-                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
-                    </li>
-                <?php endwhile; ?>
-            </ul>
-
-            <!-- Gợi ý nhóm -->
-            <h6 class="text-muted">Gợi ý nhóm</h6>
-            <ul class="list-group">
-                <?php while ($group = $suggested_groups->fetch_assoc()): ?>
-                    <li class="list-group-item d-flex align-items-center">
-                        <?php if (!empty($group['cover_image'])): ?>
-                            <img src="<?= htmlspecialchars($group['cover_image']) ?>" alt="cover" class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                        <?php else: ?>
-                            <div class="me-2 rounded bg-secondary" style="width: 40px; height: 40px;"></div>
-                        <?php endif; ?>
-                        <a href="?group_id=<?= $group['id'] ?>" style="text-decoration: none;"><?= htmlspecialchars($group['name']) ?></a>
-                    </li>
+                    <?php render_group_item($group, 'my'); ?>
                 <?php endwhile; ?>
             </ul>
         </div>
+    <?php endif; ?>
+
+    <?php if ($joined_groups->num_rows > 0): ?>
+        <div class="card mb-3">
+            <div class="card-header bg-white">
+                 <h6 class="text-primary mb-0">Nhóm đã tham gia</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                <?php while ($group = $joined_groups->fetch_assoc()): ?>
+                    <?php render_group_item($group, 'joined'); ?>
+                <?php endwhile; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($suggested_groups->num_rows > 0): ?>
+         <div class="card mb-3">
+            <div class="card-header bg-white">
+                <h6 class="text-muted mb-0">Gợi ý nhóm</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                <?php while ($group = $suggested_groups->fetch_assoc()): ?>
+                    <?php render_group_item($group, 'suggested'); ?>
+                <?php endwhile; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+</div>
         
         <!-- Chi tiết nhóm bên phải -->
         <div class="col-md-8">
-            <?php if (isset($_GET['group_id'])):
-            $gid = (int)$_GET['group_id'];
-            $stmt = $conn->prepare("SELECT * FROM groups WHERE id = ?");
-            $stmt->bind_param("i", $gid);
-            $stmt->execute();
-            $group = $stmt->get_result()->fetch_assoc();
+             <?php if (isset($_GET['group_id'])):
+    $gid = (int)$_GET['group_id'];
+    $stmt = $conn->prepare("SELECT * FROM groups WHERE id = ?");
+    $stmt->bind_param("i", $gid);
+    $stmt->execute();
+    $group = $stmt->get_result()->fetch_assoc();
 
-            // Giả sử bạn có $group['id'] và $current_user_id
-            $stmt = $conn->prepare("SELECT * FROM group_members WHERE group_id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $group['id'], $current_user_id);
-            $stmt->execute();
-            $membership_result = $stmt->get_result();
-            $is_member = $membership_result->num_rows > 0;
+    // Giả sử bạn có $group['id'] và $current_user_id
+    $stmt = $conn->prepare("SELECT * FROM group_members WHERE group_id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $group['id'], $current_user_id);
+    $stmt->execute();
+    $membership_result = $stmt->get_result();
+    $is_member = $membership_result->num_rows > 0;
 
-            // Kiểm tra đã gửi yêu cầu tham gia chưa
-            $stmt = $conn->prepare("SELECT 1 FROM group_join_requests WHERE group_id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $group['id'], $current_user_id);
-            $stmt->execute();
-            $has_pending_request = $stmt->get_result()->num_rows > 0;
-            // Đếm số lượng thành viên trong nhóm
-            $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM group_members WHERE group_id = ?");
-            $stmt->bind_param("i", $gid);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $memberCount = 0;
-            if ($row = $result->fetch_assoc()) {
-                $memberCount = $row['total'];
-            }
-            ?>
+    // Kiểm tra đã gửi yêu cầu tham gia chưa
+    $stmt = $conn->prepare("SELECT 1 FROM group_join_requests WHERE group_id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $group['id'], $current_user_id);
+    $stmt->execute();
+    $has_pending_request = $stmt->get_result()->num_rows > 0;
+    // Đếm số lượng thành viên trong nhóm
+    $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM group_members WHERE group_id = ?");
+    $stmt->bind_param("i", $gid);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $memberCount = 0;
+    if ($row = $result->fetch_assoc()) {
+        $memberCount = $row['total'];
+    }
+?>
+
             <div class="card">
                 <?php if (!empty($group['cover_image'])): ?>
                         <img src="<?= htmlspecialchars($group['cover_image']) ?>" 
@@ -510,7 +639,17 @@ $suggested_groups = $stmt->get_result();
                     </div>
                 </div>
             <?php else: ?>
-                <p>Hãy chọn một nhóm để xem.</p>
+                <div class="carousel-container">
+                    <div class="carousel-slides">
+                        <img src="./images-icon/vutru5.jpg" alt="Nhóm 1" class="carousel-img">
+                        <img src="./images-icon/vutru8.jpg" alt="Nhóm 2" class="carousel-img">
+                        <img src="./images-icon/vutru9.jpg" alt="Nhóm 3" class="carousel-img">
+                        <img src="./images-icon/vutru10.jpg" alt="Nhóm 4" class="carousel-img">
+                    </div>
+                    <div class="carousel-text">
+                        <h2>Chào mừng bạn, hãy chọn một nhóm để khám phá!</h2>
+                    </div>
+                </div>
             <?php endif; ?>
                 </div>
             </div>
