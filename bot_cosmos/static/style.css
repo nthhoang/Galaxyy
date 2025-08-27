@@ -1,0 +1,194 @@
+/* --- Tổng thể Widget --- */
+#support-widget-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+}
+
+/* --- Các nút tùy chọn (Zalo, Messenger, Chatbot) --- */
+#support-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none; /* Không cho phép click khi đang ẩn */
+}
+
+#support-widget-container.active #support-options {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.support-option {
+    width: 50px;
+    height: 50px;
+    background-color: #fff;
+    color: #1e1e1e;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.support-option:hover {
+    transform: scale(1.1);
+    background-color: #f0f0f0;
+}
+
+/* Tooltip (chú thích khi rê chuột) */
+.support-option .tooltip {
+    position: absolute;
+    right: 120%; /* Hiện bên trái của nút */
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #1e1e1e;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.support-option:hover .tooltip {
+    opacity: 1;
+}
+
+/* --- Nút Hỗ Trợ Chính --- */
+#main-support-button {
+    width: 60px;
+    height: 60px;
+    background-color: #007bff; /* Màu xanh dương hiện đại */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+#main-support-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+#main-support-button .icon-open {
+    display: block;
+}
+#main-support-button .icon-close {
+    display: none;
+}
+
+#support-widget-container.active #main-support-button {
+    transform: rotate(90deg);
+}
+
+#support-widget-container.active #main-support-button .icon-open {
+    display: none;
+}
+#support-widget-container.active #main-support-button .icon-close {
+    display: block;
+}
+
+/* --- Khung Chatbot --- */
+#chatbot-container {
+    display: none; /* Ẩn mặc định */
+    position: absolute;
+    bottom: 90px; /* Vị trí phía trên nút chính */
+    right: 0;
+    width: 320px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    overflow: hidden; /* Để bo góc cho header */
+    flex-direction: column; /* Thêm để cấu trúc linh hoạt */
+}
+
+#chatbot-header {
+    background: #1e1e1e;
+    color: #fff;
+    padding: 12px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+#close-chatbot-btn {
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+#chatbot-body {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none; /* Bỏ border trên cùng vì header đã có */
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+#chat-messages {
+    margin-bottom: 10px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#chat-messages div {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 15px;
+    line-height: 1.4;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end; /* Tin nhắn người dùng bên phải */
+    border-bottom-right-radius: 3px;
+}
+
+.bot-message {
+    background-color: #f1f1f1;
+    color: #333;
+    align-self: flex-start; /* Tin nhắn bot bên trái */
+    border-bottom-left-radius: 3px;
+}
+
+#chat-input-container {
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #eee;
+}
+
+#chat-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    box-sizing: border-box; /* Quan trọng để padding không làm vỡ layout */
+    outline: none;
+}
+#chat-input:focus {
+    border-color: #007bff;
+}

@@ -1,0 +1,126 @@
+<div id="support-widget-container">
+    <div id="chatbot-container">
+        <div id="chatbot-header">
+            <span>🚀 Chat Vũ Trụ</span>
+            <span id="close-chatbot-btn">&times;</span>
+        </div>
+        <div id="chatbot-body">
+            <div id="chat-messages"></div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Nhập câu hỏi...">
+            </div>
+        </div>
+    </div>
+
+    <div id="support-options">
+        <a href="https://zalo.me/0379799593" target="_blank" class="support-option" id="zalo-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" width="28">
+            <span class="tooltip">Chat qua Zalo</span>
+        </a>
+        <a href="https://www.facebook.com/messages/e2ee/t/6748137578586891" target="_blank" class="support-option" id="messenger-btn">
+            <i class="fab fa-facebook-messenger" style="color:#0084ff;"></i>
+            <span class="tooltip">Chat qua Messenger</span>
+        </a>
+        <div class="support-option" id="open-chatbot-btn">
+            <i class="fas fa-robot"></i>
+            <span class="tooltip">Chat với Bot</span>
+        </div>
+    </div>
+
+    <div id="main-support-button">
+        <i class="fas fa-comment-dots icon-open"></i>
+        <i class="fas fa-times icon-close"></i>
+    </div>
+</div>
+
+<script>
+    // --- Lấy các phần tử DOM ---
+    const widgetContainer = document.getElementById('support-widget-container');
+    const mainButton = document.getElementById('main-support-button');
+    const chatbotContainer = document.getElementById('chatbot-container');
+    const openChatbotBtn = document.getElementById('open-chatbot-btn');
+    const closeChatbotBtn = document.getElementById('close-chatbot-btn');
+    const chatHeader = document.getElementById('chatbot-header');
+    
+    const messages = document.getElementById('chat-messages');
+    const input = document.getElementById('chat-input');
+    
+    let isFirstTimeOpen = true;
+
+    // --- Xử lý sự kiện ---
+
+    // 1. Nhấn vào nút hỗ trợ chính
+    mainButton.onclick = () => {
+        widgetContainer.classList.toggle('active');
+    };
+
+    // 2. Nhấn vào nút "Chat với Bot"
+    openChatbotBtn.onclick = () => {
+        chatbotContainer.style.display = 'flex'; // Hiện khung chat
+        widgetContainer.classList.remove('active'); // Đóng menu tùy chọn
+        
+        // Nếu là lần đầu mở, gửi tin nhắn chào mừng
+        if (isFirstTimeOpen) {
+            sendMessage("__init__", false);
+            isFirstTimeOpen = false;
+        }
+    };
+    
+    // 3. Nhấn vào nút đóng trên header của chatbot
+    closeChatbotBtn.onclick = () => {
+        chatbotContainer.style.display = 'none';
+    };
+
+    // 4. Bắt sự kiện Enter để gửi tin nhắn
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            sendMessage(msg, true);
+        }
+    });
+
+    // --- Hàm gửi tin nhắn ---
+    async function sendMessage(msg, isUser = true) {
+        if (isUser) {
+            messages.innerHTML += `<div class="user-message"><b>Bạn:</b> ${msg}</div>`;
+        }
+        
+        // Hiển thị loading...
+        if (!isUser) {
+            messages.innerHTML += `<div class="bot-message" id="bot-typing"><b>Bot:</b> Đang suy nghĩ...</div>`;
+        }
+
+        try {
+            // URL này trỏ đến file bot_proxy.php trong cùng thư mục gốc với trangchu.php
+            const res = await fetch('/galaxy/bot_proxy.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+
+            if (!res.ok) {
+                 throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const data = await res.json();
+            
+            // Xóa loading và hiển thị câu trả lời
+            const typingIndicator = document.getElementById('bot-typing');
+            if (typingIndicator) typingIndicator.remove();
+            
+            messages.innerHTML += `<div class="bot-message"><b>Bot:</b> ${data.reply}</div>`;
+
+        } catch (err) {
+            const typingIndicator = document.getElementById('bot-typing');
+            if (typingIndicator) typingIndicator.remove();
+            
+            console.error("Fetch Error:", err);
+            messages.innerHTML += `<div class="bot-message"><b>Bot:</b> ❌ Lỗi kết nối. Vui lòng thử lại.</div>`;
+        }
+
+        // Tự động cuộn xuống tin nhắn mới nhất
+        messages.parentElement.scrollTop = messages.parentElement.scrollHeight;
+    }
+</script>
