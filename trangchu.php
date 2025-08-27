@@ -27,6 +27,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
  
      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
+    <link rel="stylesheet" href="bot_cosmos/static/style.css">
+    <!-- <link rel="stylesheet" href="chatbot/static/chatbot.css">
+    <script src="chatbot/static/chatbot.js"></script> -->
 <body>
    
   <header id="head"> 
@@ -125,6 +128,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
     const user_id = "<?php echo $_SESSION['user_id']; ?>";
   </script>
   <script src="/galaxy/js/noti.js"></script>
+
+  <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 
 </body>
 </html>

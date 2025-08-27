@@ -342,5 +342,18 @@ $translations = [
         'vi' => 'Xem thêm',
         'en' => 'See more ',
     ],
+    'su_kien_noi_bat' => [
+    'vi' => '🌟 Sự kiện nổi bật',
+    'en' => '🌟 Featured Events',
+    ],
+    'vi_tri_su_kien' => [
+        'vi' => '📍 Vị trí sự kiện',
+        'en' => '📍 Event Location',
+    ],
+    'su_kien_sap_dien_ra' => [
+        'vi' => '⏰ Sự kiện sắp diễn ra',
+        'en' => '⏰ Upcoming Events',
+    ],
+
 ];
 ?>

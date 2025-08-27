@@ -69,7 +69,7 @@ if (isset($_POST['save_news'])) {
         ]
     ];
     $context = stream_context_create($options);
-    file_get_contents("http://localhost:4000/notify", false, $context);
+    file_get_contents("http://localhost:3000/notify", false, $context);
 
     } else {
     echo "Lỗi khi lưu bài viết!";

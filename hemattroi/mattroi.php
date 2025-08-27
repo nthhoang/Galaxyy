@@ -17,6 +17,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap&subset=vietnamese" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <link rel="stylesheet" href="/galaxy/bot_cosmos/static/style.css">
 
     <style>
         /* CSS CHO NỘI DUNG TRANG MẶT TRỜI */
@@ -348,5 +349,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
     const user_id = "<?php echo $_SESSION['user_id']; ?>";
     </script>
     <script src="/galaxy/js/noti.js"></script>
+    <?php include '../bot_cosmos/templates/chat_window.html'; ?>
     </body>
 </html>

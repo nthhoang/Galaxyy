@@ -96,7 +96,7 @@ try {
         ]
     ];
     $context = stream_context_create($options);
-    file_get_contents("http://localhost:4000/notify", false, $context);
+    file_get_contents("http://localhost:3000/notify", false, $context);
 
     $notification_id = intval($notification_id);  // ID thông báo vừa thêm vào bảng notifications
     $current_user_id = $_SESSION['user_id'];      // Người gửi thông báo

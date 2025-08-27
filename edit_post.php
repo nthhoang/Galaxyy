@@ -66,6 +66,7 @@
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <link rel="stylesheet" href="bot_cosmos/static/style.css">
 </head>
 <body>
     <header id="head"> 
@@ -185,5 +186,6 @@
         const user_id = "<?php echo $_SESSION['user_id']; ?>";
     </script>
     <script src="/galaxy/js/noti.js"></script>
+    <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>

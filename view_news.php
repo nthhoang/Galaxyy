@@ -70,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
     <title><?= htmlspecialchars($news['title']) ?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="bot_cosmos/static/style.css">
    <style>
         body { background-color: #0a0f1f; color: #e0e0e0; font-family: 'Lato', sans-serif;  cursor:  url('/galaxy/cursor.cur'),  auto !important;}
         .article-header { border-bottom: 1px solid #334155; }
@@ -237,6 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
                     </div>
                 </div>
         </div>
+        <?php include 'bot_cosmos/templates/chat_window.html'; ?>
     </main>
 </body>
 </html>

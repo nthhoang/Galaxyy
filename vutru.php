@@ -22,6 +22,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
     <link rel="stylesheet" href="/galaxy/css/noti.css">
     <link rel="stylesheet" href="/galaxy/css/header.css">
     <link rel="stylesheet" href="/galaxy/css/vutru.css">
+    <link rel="stylesheet" href="bot_cosmos/static/style.css">
 </head>
 <body>
       <header id="head"> 
@@ -440,7 +441,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
         </div>
       </div>
     </div>
-
+    
      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
     <script src="/galaxy/js/vutru.js"></script>
@@ -453,5 +454,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
         const user_id = "<?php echo $_SESSION['user_id']; ?>";
     </script>
     <script src="/galaxy/js/noti.js"></script>
+    <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>

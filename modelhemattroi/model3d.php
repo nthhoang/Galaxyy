@@ -23,6 +23,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="/galaxy/css/model3dhmt.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <link rel="stylesheet" href="/galaxy/bot_cosmos/static/style.css">
 </head>
 <>
 
@@ -123,6 +124,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
     const user_id = "<?php echo $_SESSION['user_id']; ?>";
   </script>
   <script src="/galaxy/js/noti.js"></script>
-
+    <?php include '../bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>

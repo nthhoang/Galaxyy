@@ -114,6 +114,7 @@ function render_group_item($group, $type = 'suggested') {
     <link rel="stylesheet" href="/galaxy/css/congdong.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <link rel="stylesheet" href="bot_cosmos/static/style.css">
     <style>
     .card-body .list-group-item {
         border-left: 0;
@@ -668,6 +669,7 @@ function render_group_item($group, $type = 'suggested') {
         const user_id = "<?php echo $_SESSION['user_id']; ?>";
     </script>
     <script src="/galaxy/js/noti.js"></script>
+    <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 <!-- Modal tạo nhóm -->
 <div class="modal fade" id="modalTaoNhom" tabindex="-1">

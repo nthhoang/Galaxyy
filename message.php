@@ -60,7 +60,10 @@ if ($conversation_id) {
     <title>Hộp Thư</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="bot_cosmos/static/style.css">
 </head>
 <body>
 
@@ -149,7 +152,6 @@ if ($conversation_id) {
     <span class="lightbox-close">&times;</span>
     <img class="lightbox-content" id="lightbox-img">
 </div>
-
 
 <script>
     // Tự động cuộn xuống tin nhắn cuối cùng
@@ -275,6 +277,6 @@ if ($conversation_id) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
     });
 </script>
-
+<?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>
