@@ -300,6 +300,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
                 </li>
                 <li class="dropdown"><a href="#"><img src="/galaxy/images-icon/more.png" alt=""><?= t('6') ?></a>
                     <div class="dropdown-content" style="left: -170%">
+                         <a class="item" href="/galaxy/galaxy_lib.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,2') ?></a>
                         <a class="item" href="/galaxy/vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
                         <a class="language-switcher-container">
                         <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox"

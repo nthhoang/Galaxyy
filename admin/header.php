@@ -65,6 +65,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="event_management.php">Sự kiện</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="galaxy_lib_admin.php">Thư viện vũ trụ</a>
+                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">

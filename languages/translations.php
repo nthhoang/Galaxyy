@@ -82,6 +82,10 @@ $translations = [
         'vi' => 'VỀ CHÚNG TÔI',
         'en' => 'ABOUT US'
     ],
+    '6,2' => [
+        'vi' => 'THƯ VIỆN VŨ TRỤ',
+        'en' => 'UNIVERSE LIBRARY'
+    ],
     
    //sukien
  

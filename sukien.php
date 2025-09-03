@@ -225,6 +225,7 @@ function hasCared($conn, $user_id, $event_id) {
                     <li class="dropdown">
                         <a href="#"><img src="/galaxy/images-icon/more.png" alt=""><?= t('6') ?></a>
                         <div class="dropdown-content" style="left: -170%">
+                           <a class="item" href="galaxy_lib.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,2') ?></a>
                             <a class="item" href="vechungtoi.php"><img src="/galaxy/images-icon/group.png" alt=""><?= t('6,1') ?></a>
                             <a class="language-switcher-container">
                                 <input type="checkbox" id="lang-toggle" class="lang-toggle-checkbox" <?php if(isset($current_lang)) echo ($current_lang == 'en') ? 'checked' : ''; ?>>

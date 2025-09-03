@@ -22,6 +22,7 @@ socket.on("receive_notification", (data) => {
   }
 });
 
+
 // Render toàn bộ thông báo
 function updateNotificationUI() {
   const countElem = document.getElementById("notification-count");
@@ -36,6 +37,7 @@ function updateNotificationUI() {
 
   notifications.forEach(n => {
     const li = document.createElement("li");
+    
     const createdAt = n.created_at;
     const timeString = timeAgo(createdAt);
 

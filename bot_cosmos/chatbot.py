@@ -3,7 +3,7 @@ import json
 import requests
 import time
 
-API_KEY = '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'
+API_KEY = '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'
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 MODEL_ID = "gpt-3.5-turbo"
 
