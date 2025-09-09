@@ -296,14 +296,14 @@
     </div>
 <script src="/galaxy/js/congdong.js"></script>
 <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
-
-    <script>
-        const storedNotifications = <?php echo json_encode($notifications); ?>;
-        let notificationCount = <?php echo $unreadCount; ?>;
-        let notifications = storedNotifications;
-        const user_id = "<?php echo $_SESSION['user_id']; ?>";
-    </script>
-    <script src="/galaxy/js/noti.js"></script>
-    <?php include 'bot_cosmos/templates/chat_window.html'; ?>
+<script src="/galaxy/js/menutoggle.js"></script>
+<script>
+    const storedNotifications = <?php echo json_encode($notifications); ?>;
+    let notificationCount = <?php echo $unreadCount; ?>;
+    let notifications = storedNotifications;
+    const user_id = "<?php echo $_SESSION['user_id']; ?>";
+</script>
+<script src="/galaxy/js/noti.js"></script>
+<?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>

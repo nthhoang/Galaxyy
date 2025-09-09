@@ -106,10 +106,11 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
         ?>
     </main>
 
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="/galaxy/js/vechungtoi.js"></script>
-<script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+    <script src="/galaxy/js/vechungtoi.js"></script>
+    <script src="/galaxy/js/menutoggle.js"></script>
+    
     <script>
         const storedNotifications = <?php echo json_encode($notifications); ?>;
         let notificationCount = <?php echo $unreadCount; ?>;

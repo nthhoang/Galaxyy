@@ -93,8 +93,11 @@ if ($conversation_id) {
     <div class="chat-box">
         <?php if ($conversation_id && $partner): ?>
             <div class="chat-header">
-                <?= htmlspecialchars($partner['username']) ?> 
+                <span class="back-btn d-md-none"><i class="bi bi-arrow-left"></i></span>
+                <span class="chat-username"><?= htmlspecialchars($partner['username']) ?></span>
+                <span class="info-btn d-md-none"><i class="bi bi-info-circle"></i></span>
             </div>
+
             <div class="messages-area" id="messages-area">
                 <?php while ($msg = $messages->fetch_assoc()): ?>
                     <div class="message <?= $msg['sender_id'] == $current_user_id ? 'sent' : 'received' ?>">
@@ -126,26 +129,35 @@ if ($conversation_id) {
     </div>
 
     <?php if ($conversation_id && $partner): ?>
-    <div class="sidebar-right">
-        <a href="trangcanhan.php?user_id=<?= $partner['id'] ?>" class="partner-info" style="text-decoration: none;">
-            <img src="<?= htmlspecialchars($partner['avatar'] ?: 'default_avatar.png') ?>" class="rounded-circle">
-            <h5 class="username mt-2"><?= htmlspecialchars($partner['username']) ?></h5>
-        </a>
-        <hr>
-        <div class="shared-media">
-            <h6>Ảnh đã chia sẻ</h6>
-            <?php if ($shared_images && $shared_images->num_rows > 0): ?>
-                <div class="media-grid">
-                    <?php while($image = $shared_images->fetch_assoc()): ?>
-                        <img src="<?= htmlspecialchars($image['image_path']) ?>" alt="Shared Image" class="zoomable-image">
-                    <?php endwhile; ?>
-                </div>
-            <?php else: ?>
-                <p class="text-muted small">Chưa có ảnh nào được chia sẻ.</p>
-            <?php endif; ?>
-        </div>
+<div class="sidebar-right">
+    <!-- Header của sidebar-right -->
+    <div class="sidebar-right-header d-flex align-items-center mb-3">
+        <span class="back-to-chat d-md-none me-2">
+            <i class="bi bi-arrow-left"></i>
+        </span>
+        <h6 class="mb-0">Thông tin</h6>
     </div>
-    <?php endif; ?>
+
+    <a href="trangcanhan.php?user_id=<?= $partner['id'] ?>" class="partner-info" style="text-decoration: none;">
+        <img src="<?= htmlspecialchars($partner['avatar'] ?: 'default_avatar.png') ?>" class="rounded-circle">
+        <h5 class="username mt-2"><?= htmlspecialchars($partner['username']) ?></h5>
+    </a>
+    <hr>
+    <div class="shared-media">
+        <h6>Ảnh đã chia sẻ</h6>
+        <?php if ($shared_images && $shared_images->num_rows > 0): ?>
+            <div class="media-grid">
+                <?php while($image = $shared_images->fetch_assoc()): ?>
+                    <img src="<?= htmlspecialchars($image['image_path']) ?>" alt="Shared Image" class="zoomable-image">
+                <?php endwhile; ?>
+            </div>
+        <?php else: ?>
+            <p class="text-muted small">Chưa có ảnh nào được chia sẻ.</p>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
 </div>
 
 <div id="image-lightbox" class="lightbox">
@@ -193,11 +205,59 @@ if ($conversation_id) {
                 }
             });
         }
+
+        // điều chỉnh 2 phần 2 bên 
+        const sidebarLeft = document.querySelector(".sidebar-left");
+    const chatBox = document.querySelector(".chat-box");
+    const sidebarRight = document.querySelector(".sidebar-right");
+    const backBtn = document.querySelector(".back-btn");
+    const infoBtn = document.querySelector(".info-btn");
+
+    // Khi load mobile: nếu có conversation_id thì mở chat-box, nếu không thì danh sách
+    if (window.innerWidth <= 768) {
+        if (conversation_id) {
+            chatBox?.classList.add("active");
+        } else {
+            sidebarLeft?.classList.add("active");
+        }
+    } else {
+        // Desktop: luôn hiển thị cả 3 cột
+        sidebarLeft?.classList.add("active");
+        chatBox?.classList.add("active");
+        sidebarRight?.classList.add("active");
+    }
+
+    // Nút back: quay về danh sách chat
+    if (backBtn) {
+        backBtn.addEventListener("click", function () {
+            chatBox.classList.remove("active");
+            sidebarRight?.classList.remove("active");
+            sidebarLeft.classList.add("active");
+        });
+    }
+
+    // Nút info: mở sidebar phải
+    if (infoBtn) {
+        infoBtn.addEventListener("click", function () {
+            sidebarRight.classList.add("active");
+            chatBox.classList.remove("active");
+        });
+    }
+
+    // back to chat
+    const backToChatBtn = document.querySelector(".back-to-chat");
+if (backToChatBtn) {
+    backToChatBtn.addEventListener("click", function () {
+        sidebarRight.classList.remove("active");
+        chatBox.classList.add("active");
+    });
+}
+
     });
 </script>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-    const socket = io("http://localhost:3000"); // nếu deploy, đổi thành domain thực tế
+    const socket = io("http://localhost:3000"); // nếu deploy, đổi thành domain thực tế https://repo-socket-server.onrender.com
     const current_user_id = <?= $current_user_id ?>;
     const partner_id = <?= $partner ? $partner['id'] : 'null' ?>;
     const conversation_id = <?= $conversation_id ?? 'null' ?>;
@@ -277,6 +337,8 @@ if ($conversation_id) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
     });
 </script>
+
+
 <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>

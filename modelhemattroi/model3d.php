@@ -99,6 +99,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';?>
  <div id="controls-container">
         <button id="playPauseButton"></button>
         <button id="toggleOrbitsButton"></button>
+         <!-- <button id="tourButton">Bắt đầu chuyến du hành</button>  -->
     </div>
     
     <div id="object-info-box"></div>

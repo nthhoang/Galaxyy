@@ -106,7 +106,7 @@
         <main class="container mt-4">
             <div class="row">
                 <!-- Cột trái: người nổi bật + nhóm nổi bật cùng một khối sticky -->
-                <div class="col-md-4">
+                <div class="col-md-4 col-12 order-2 order-md-1">
                     <div class="sticky-top" style="top: 100px; z-index: 1000;">
                         
                         <!-- Người nổi bật -->
@@ -161,18 +161,24 @@
 
                 
                 <!-- Cột phải: phần đăng bài và post feed -->
-                <div class="col-md-8">
-                   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
-                    <div class="position-relative" style="max-width: 400px; margin: 0;">
-                        <input type="text" id="search-user" class="form-control" placeholder="🔍 Tìm người dùng..." autocomplete="off">
-                        <ul id="suggestions" class="list-group position-absolute w-100" style="z-index: 9999;"></ul>
+                <div class="col-md-8 col-12 order-1 order-md-2">
+                   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+  
+                        <!-- Ô tìm kiếm -->
+                        <div class="position-relative mb-2 mb-md-0" style="max-width: 300px; flex: 1;">
+                            <input type="text" id="search-user" class="form-control" placeholder="🔍 Tìm người dùng..." autocomplete="off">
+                            <ul id="suggestions" class="list-group position-absolute w-100" style="z-index: 9999;"></ul>
+                        </div>
+
+                        <!-- Các nút -->
+                        <div class="d-flex gap-2">
+                            <a href="nhom.php" class="btn btn-info"><i class="fas fa-users"></i> Nhóm</a>
+                            <a href="message.php" class="btn btn-success"><i class="fas fa-comments"></i> Chat</a>
+                        </div>
+
                     </div>
-                    <div>
-                    <a href="nhom.php" class="btn btn-info"><i class="fas fa-users"></i> Nhóm</a>
-                    <a href="message.php" class="btn btn-success"><i class="fas fa-comments"></i> Chat</a>
-                    </div>
-                </div>
-                    <div class="post-form-container">
+
+                    <div class="post-form-container mt-3">
                         <form action="submit_post.php" method="POST" enctype="multipart/form-data">
                             <div class="post-form-body">
                                 <a href="trangcanhan.php?user_id=<?= $current_user_id ?>" style="cursor: url('/galaxy/cursor.cur'), auto;"><img src="<?php echo $currentUserAvatar; ?>" alt="Avatar" class="form-avatar"></a>

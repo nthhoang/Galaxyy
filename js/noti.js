@@ -25,49 +25,51 @@ socket.on("receive_notification", (data) => {
 
 // Render toàn bộ thông báo
 function updateNotificationUI() {
-  const countElem = document.getElementById("notification-count");
-  const listElem = document.getElementById("notification-items");
+    const SERVER_OFFSET_SECONDS = 110;
+    const countElem = document.getElementById("notification-count");
+    const listElem = document.getElementById("notification-items");
 
-  if (!countElem || !listElem) return;
+    if (!countElem || !listElem) return;
 
-  countElem.innerText = notificationCount;
-  countElem.style.display = notificationCount > 0 ? "inline-block" : "none";
+    countElem.innerText = notificationCount;
+    countElem.style.display = notificationCount > 0 ? "inline-block" : "none";
 
-  listElem.innerHTML = "";
+    listElem.innerHTML = "";
 
-  notifications.forEach(n => {
-    const li = document.createElement("li");
-    
-    const createdAt = n.created_at;
-    const timeString = timeAgo(createdAt);
+    notifications.forEach(n => {
+        const li = document.createElement("li");
 
-    if (n.id_news && n.id_news != 0) {
-      // Nếu là bài tin tức
-      li.innerHTML = `
+              // Parse created_at
+        let createdAt = new Date(n.created_at);
+        createdAt = new Date(createdAt.getTime() - SERVER_OFFSET_SECONDS * 1000);
+        const timeString = timeAgo(createdAt);
+        if (n.id_news && n.id_news != 0) {
+            // Nếu là bài tin tức
+            li.innerHTML = `
         <a href="/galaxy/view_news.php?id=${n.id_news}">
           <i class="fa fa-newspaper"></i> ${n.message}
         </a>
         <br>
         <p class="time_up">Đăng lúc: ${timeString}</p>
       `;
-    } else {
-      // Nếu là bài post cộng đồng
-      li.innerHTML = `
+        } else {
+            // Nếu là bài post cộng đồng
+            li.innerHTML = `
         <a href="/galaxy/post_details.php?id=${n.id_post}">
           <i class="fa fa-users"></i> ${n.message}
         </a>
         <br>
         <p class="time_up">Đăng lúc: ${timeString}</p>
       `;
-    }
+        }
 
-    // Đánh dấu in đậm nếu chưa đọc
-    if (n.is_read == 0) {
-      li.style.fontWeight = "bold";
-    }
+        // Đánh dấu in đậm nếu chưa đọc
+        if (n.is_read == 0) {
+            li.style.fontWeight = "bold";
+        }
 
-    listElem.appendChild(li);
-  });
+        listElem.appendChild(li);
+    });
 }
 
 // Sự kiện click chuông thông báo

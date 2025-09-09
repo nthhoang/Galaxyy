@@ -161,6 +161,7 @@ function hasCared($conn, $user_id, $event_id) {
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sự Kiện Thiên Văn</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -540,12 +541,23 @@ function hasCared($conn, $user_id, $event_id) {
 <div class="container my-5">
   <h3 class="mb-3">🏷️ Danh mục sự kiện</h3>
 
-  <!-- Tabs -->
-  <ul class="nav nav-tabs" id="eventTabs" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabSap">Sắp diễn ra</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDang">Đang diễn ra</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDa">Đã diễn ra</button></li>
-  </ul>
+<!-- Tabs -->
+<ul class="nav nav-tabs d-flex flex-nowrap" 
+    id="eventTabs" role="tablist"
+    style="white-space: nowrap; overflow-x: auto; overflow-y: hidden;">
+  
+  <li class="nav-item flex-shrink-0">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabSap">Sắp diễn ra</button>
+  </li>
+  <li class="nav-item flex-shrink-0">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDang">Đang diễn ra</button>
+  </li>
+  <li class="nav-item flex-shrink-0">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDa">Đã diễn ra</button>
+  </li>
+</ul>
+
+
 
   <div class="tab-content mt-3">
     <!-- Tab Sắp diễn ra -->
@@ -557,10 +569,10 @@ function hasCared($conn, $user_id, $event_id) {
         <div class="col-12 mb-3">
           <div class="card event-card border-0 shadow-sm overflow-hidden">
             <div class="row g-0 h-100">
-              <div class="col-2">
+              <div class="col-4 col-md-2">
                 <img src="<?= htmlspecialchars($ev['image_url']) ?>" class="img-fluid h-100 w-100" style="object-fit:cover;" alt="">
               </div>
-              <div class="col-10">
+              <div class="col-8 col-md-10">
                 <div class="card-body d-flex flex-column h-100">
                   <h5 class="card-title"><?= htmlspecialchars($ev['title_vi']) ?></h5>
                 <small class="card-location">📍 <?= htmlspecialchars($ev['place_name']) ?></small>
@@ -599,10 +611,10 @@ function hasCared($conn, $user_id, $event_id) {
             <div class="col-12 mb-3">
               <div class="card event-card border-0 shadow-sm overflow-hidden">
                 <div class="row g-0 h-100">
-                  <div class="col-2">
+                  <div class="col-4 col-md-2">
                     <img src="<?= htmlspecialchars($ev['image_url']) ?>" class="img-fluid h-100 w-100" style="object-fit:cover;" alt="">
                   </div>
-                  <div class="col-10">
+                  <div class="col-8 col-md-10">
                     <div class="card-body d-flex flex-column h-100">
                       <h5 class="card-title"><?= htmlspecialchars($ev['title_vi']) ?></h5>
                     <small class="card-location">📍 <?= htmlspecialchars($ev['place_name']) ?></small>
@@ -633,10 +645,10 @@ function hasCared($conn, $user_id, $event_id) {
             <div class="col-12 mb-3">
               <div class="card event-card border-0 shadow-sm overflow-hidden">
                 <div class="row g-0 h-100">
-                  <div class="col-2">
+                  <div class="col-4 col-md-2">
                     <img src="<?= htmlspecialchars($ev['image_url']) ?>" class="img-fluid h-100 w-100" style="object-fit:cover;" alt="">
                   </div>
-                  <div class="col-10">
+                  <div class="col-8 col-md-10">
                     <div class="card-body d-flex flex-column h-100">
                       <h5 class="card-title"><?= htmlspecialchars($ev['title_vi']) ?></h5>
                     <small class="card-location">📍 <?= htmlspecialchars($ev['place_name']) ?></small>
@@ -677,125 +689,126 @@ function hasCared($conn, $user_id, $event_id) {
 </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Chỉ chạy khi chưa có lat/lng trong URL và cũng không phải đang search có giá trị
-const urlParams = new URLSearchParams(window.location.search);
-const hasLat = urlParams.has("lat");
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  // Chỉ chạy khi chưa có lat/lng trong URL và cũng không phải đang search có giá trị
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasLat = urlParams.has("lat");
 
-// Lấy giá trị thật sự của search params
-const searchVal     = (urlParams.get("search") || "").trim();
-const dateVal       = (urlParams.get("date") || "").trim();
-const latSearchVal  = (urlParams.get("lat_search") || "").trim();
+  // Lấy giá trị thật sự của search params
+  const searchVal     = (urlParams.get("search") || "").trim();
+  const dateVal       = (urlParams.get("date") || "").trim();
+  const latSearchVal  = (urlParams.get("lat_search") || "").trim();
 
-// Kiểm tra có search hợp lệ (có giá trị thực sự)
-const hasSearch = searchVal !== "" || dateVal !== "" || latSearchVal !== "";
+  // Kiểm tra có search hợp lệ (có giá trị thực sự)
+  const hasSearch = searchVal !== "" || dateVal !== "" || latSearchVal !== "";
 
-if (!hasLat && !hasSearch) {
-  navigator.geolocation.getCurrentPosition(function(position) {
-      let lat = position.coords.latitude;
-      let lng = position.coords.longitude;
-      // Gửi lên server qua query string, giữ lại các tham số khác nếu có
-      urlParams.set("lat", lat);
-      urlParams.set("lng", lng);
-      window.location.search = urlParams.toString();
-  });
-}
-</script>
+  if (!hasLat && !hasSearch) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        let lat = position.coords.latitude;
+        let lng = position.coords.longitude;
+        // Gửi lên server qua query string, giữ lại các tham số khác nếu có
+        urlParams.set("lat", lat);
+        urlParams.set("lng", lng);
+        window.location.search = urlParams.toString();
+    });
+  }
+  </script>
 
-<script>
-document.querySelectorAll('.btn-quan-tam').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    let eventId = this.dataset.id;
+  <script>
+  document.querySelectorAll('.btn-quan-tam').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      let eventId = this.dataset.id;
 
-    fetch("quan_tam.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "id=" + encodeURIComponent(eventId)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        // Cập nhật tất cả nút cùng event
-        let buttons = document.querySelectorAll('.btn-quan-tam[data-id="' + eventId + '"]');
-        buttons.forEach(b => {
-          b.classList.remove("btn-primary");
-          b.classList.add("btn-secondary");
-          b.textContent = "Đã quan tâm";
-          b.disabled = true;
-        });
+      fetch("quan_tam.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "id=" + encodeURIComponent(eventId)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Cập nhật tất cả nút cùng event
+          let buttons = document.querySelectorAll('.btn-quan-tam[data-id="' + eventId + '"]');
+          buttons.forEach(b => {
+            b.classList.remove("btn-primary");
+            b.classList.add("btn-secondary");
+            b.textContent = "Đã quan tâm";
+            b.disabled = true;
+          });
 
-        // Cập nhật tất cả số quan tâm
-        let countSpans = document.querySelectorAll('.care-count[data-id="' + eventId + '"]');
-        countSpans.forEach(span => {
-          span.textContent = "❤️" + data.count ;
-        });
+          // Cập nhật tất cả số quan tâm
+          let countSpans = document.querySelectorAll('.care-count[data-id="' + eventId + '"]');
+          countSpans.forEach(span => {
+            span.textContent = "❤️" + data.count ;
+          });
 
-      } else {
-        alert("Có lỗi xảy ra: " + data.message);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Có lỗi xảy ra khi gửi yêu cầu.");
+        } else {
+          alert("Có lỗi xảy ra: " + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+      });
     });
   });
-});
 
-// sử lí chọn vị trí bản đồ khi search 
-let map, marker;
-function openMapPicker() {
-  var modalEl = document.getElementById('mapModal');
-  var modal = new bootstrap.Modal(modalEl);
-  modal.show();
+  // sử lí chọn vị trí bản đồ khi search 
+  let map, marker;
+  function openMapPicker() {
+    var modalEl = document.getElementById('mapModal');
+    var modal = new bootstrap.Modal(modalEl);
+    modal.show();
 
-  modalEl.addEventListener('shown.bs.modal', function () {
-    if (!map) {
-      map = L.map('map').setView([16.0471, 108.2068], 12); // Đà Nẵng
+    modalEl.addEventListener('shown.bs.modal', function () {
+      if (!map) {
+        map = L.map('map').setView([16.0471, 108.2068], 12); // Đà Nẵng
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-      }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+        }).addTo(map);
 
-      map.on('click', function(e) {
-        if (marker) marker.remove();
-        marker = L.marker(e.latlng).addTo(map);
+        map.on('click', function(e) {
+          if (marker) marker.remove();
+          marker = L.marker(e.latlng).addTo(map);
 
-        let lat = e.latlng.lat;
-        let lng = e.latlng.lng;
-        document.getElementById("lat_search").value = lat;
-        document.getElementById("lng_search").value = lng;
+          let lat = e.latlng.lat;
+          let lng = e.latlng.lng;
+          document.getElementById("lat_search").value = lat;
+          document.getElementById("lng_search").value = lng;
 
-        // Gọi API để lấy tên địa điểm
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
-          .then(res => res.json())
-          .then(data => {
-            let placeName = data.display_name || "Vị trí đã chọn";
-            document.getElementById("place_name_search").value = placeName;
-            document.getElementById("btn-location").innerText = "🌍 " + placeName;
-          });
-      });
-    } else {
-      map.invalidateSize();
-    }
-  });
-}
+          // Gọi API để lấy tên địa điểm
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+            .then(res => res.json())
+            .then(data => {
+              let placeName = data.display_name || "Vị trí đã chọn";
+              document.getElementById("place_name_search").value = placeName;
+              document.getElementById("btn-location").innerText = "🌍 " + placeName;
+            });
+        });
+      } else {
+        map.invalidateSize();
+      }
+    });
+  }
 
-function saveLocation() {
-  bootstrap.Modal.getInstance(document.getElementById('mapModal')).hide();
-}
+  function saveLocation() {
+    bootstrap.Modal.getInstance(document.getElementById('mapModal')).hide();
+  }
 
-</script>
-<script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+  </script>
+  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+  <script src="/galaxy/js/menutoggle.js"></script>
 
-    <script>
-        const storedNotifications = <?php echo json_encode($notifications); ?>;
-        let notificationCount = <?php echo $unreadCount; ?>;
-        let notifications = storedNotifications;
-        const user_id = "<?php echo $_SESSION['user_id']; ?>";
-    </script>
-    <script src="/galaxy/js/noti.js"></script>
-    <?php include 'bot_cosmos/templates/chat_window.html'; ?>
+  <script>
+      const storedNotifications = <?php echo json_encode($notifications); ?>;
+      let notificationCount = <?php echo $unreadCount; ?>;
+      let notifications = storedNotifications;
+      const user_id = "<?php echo $_SESSION['user_id']; ?>";
+  </script>
+  <script src="/galaxy/js/noti.js"></script>
+  <?php include 'bot_cosmos/templates/chat_window.html'; ?>
 </body>
 </html>
