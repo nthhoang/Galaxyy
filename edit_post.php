@@ -137,7 +137,7 @@
         <main class="container">
             <h1 class="mb-4 text-white"><?= t('edit-congdong-1') ?></h1>
             <div class="edit-form-container">
-                <form action="update_post.php?group=<?= $isGroupPost ? 'true' : ""  ?>" method="POST" enctype="multipart/form-data">
+                <form action="update_post.php<?= $isGroupPost ? '?group=true' : ""  ?>" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
 
                     <div class="mb-3">

@@ -184,7 +184,7 @@
         font-size: 1.5rem; /* ~24px */
     }
     .custom-card .card-text {
-        color: var(--text-muted);
+        color: #c0c0c0;
         font-size: 0.95rem; /* ~15px */
     }
     .custom-card .card-img-top {

@@ -3,7 +3,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
 $user_id = $_SESSION['user_id'];
 
 // Lấy tất cả broadcast (và trạng thái đọc), kết hợp với individual gửi riêng cho user này
-$sql = "
+$sql = "   
     (
         SELECT n.id, n.message, n.created_at, n.id_news, n.id_post, 
                COALESCE(nu.is_read, 0) AS is_read

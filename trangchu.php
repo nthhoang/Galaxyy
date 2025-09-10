@@ -5,7 +5,35 @@ $loggedIn = isset($_SESSION['username']);
 <?php require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php'; 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/db.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
+
+// 1. Xác định các cột ngôn ngữ
+$title_col = ($current_lang == 'en') ? 'title_en' : 'title_vi';
+$category_col = ($current_lang == 'en') ? 'category_en' : 'category_vi';
+$excerpt_col = ($current_lang == 'en') ? 'excerpt_en' : 'excerpt_vi';
+
+// tin nổi bật
+$sql_featured = "SELECT id, {$title_col} AS title, image_url, created_at FROM news WHERE is_featured = 1 ORDER BY created_at DESC LIMIT 5";
+$result_featured = $conn->query($sql_featured);
+$featured_news = $result_featured->fetch_all(MYSQLI_ASSOC);
 ?>
+
+<!-- thông báo trạng thái đăng kí email -->
+<?php if (isset($_GET['success'])): ?>
+    <?php if ($_GET['success'] == 1): ?>
+        <div class="alert alert-success mt-4">
+            Bạn đã đăng ký email thành công!
+        </div>
+    <?php elseif ($_GET['success'] == 2): ?>
+        <div class="alert alert-warning mt-4">
+            Email này đã được đăng ký trước đó!
+        </div>
+    <?php else: ?>
+        <div class="alert alert-danger mt-4">
+            Có lỗi xảy ra, vui lòng thử lại!
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
+
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -24,12 +52,11 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
     <link rel="stylesheet" href="/galaxy/css/header.css">
     <link rel="stylesheet" href="/galaxy/css/trangchu.css">
     <link rel="stylesheet" href="/galaxy/css/noti.css">
+    <link rel="stylesheet" href="/galaxy/css/footer.css">
  
      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="bot_cosmos/static/style.css">
-    <!-- <link rel="stylesheet" href="chatbot/static/chatbot.css">
-    <script src="chatbot/static/chatbot.js"></script> -->
 <body>
    
   <header id="head"> 
@@ -107,16 +134,27 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
      <main class="sun-content-section">
         <?php
             // 1. Xác định đường dẫn đến tệp nội dung dựa trên ngôn ngữ hiện tại
-            $content_file = $_SERVER['DOCUMENT_ROOT'] . "/galaxy/content/trangchu_{$current_lang}.html";
+            $content_file = $_SERVER['DOCUMENT_ROOT'] . "/galaxy/content/trangchu_{$current_lang}.php";
 
             // 2. Kiểm tra tệp có tồn tại không và đọc toàn bộ nội dung của nó
             if (file_exists($content_file)) {
-                echo file_get_contents($content_file);
+                include  $content_file;
             } else {
                 echo "Nội dung không có sẵn cho ngôn ngữ này.";
             }
         ?>
     </main>
+        <?php
+            // 1. Xác định đường dẫn đến tệp nội dung dựa trên ngôn ngữ hiện tại
+            $content_file = $_SERVER['DOCUMENT_ROOT'] . "/galaxy/footer.html";
+
+            // 2. Kiểm tra tệp có tồn tại không và đọc toàn bộ nội dung của nó
+            if (file_exists($content_file)) {
+                echo  file_get_contents($content_file);
+            } else {
+                echo "Nội dung không có sẵn cho ngôn ngữ này.";
+            }
+        ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="/galaxy/js/trangchu.js"></script>

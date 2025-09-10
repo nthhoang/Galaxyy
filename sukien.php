@@ -1,6 +1,7 @@
 <?php
 session_start();
 $loggedIn = isset($_SESSION['username']);
+// them ham t($key) de lay noi dung theo ngon ngu tuong ung
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/lang.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
 require_once 'db.php';

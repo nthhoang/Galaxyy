@@ -113,7 +113,12 @@ try {
 
     // 7. Hoàn tất và chuyển hướng
     $conn->commit();
-    header("Location: post_group_detail.php?id=" . $post_id . "&status=updated");
+    if($isGroupPost){
+        header("Location: post_group_detail.php?id=" . $post_id . "&status=updated");
+    }else{
+        header("Location: post_details.php?id=" . $post_id . "&status=updated");
+    }
+    
     exit();
 
 } catch (Exception $e) {

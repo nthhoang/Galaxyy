@@ -1,0 +1,232 @@
+        :root {
+        
+            --border-color: rgba(0, 255, 255, 0.2);
+        }
+
+        .site-footer {
+            background-color: rgba(26, 35, 58, 0.7); /* Thêm lớp phủ mờ nhẹ để chữ dễ đọc hơn */
+            color: var( --color-text-light);
+            padding: 60px 0 20px;
+            position: relative;
+            overflow: hidden;
+            font-size: 16px;
+            border-top: 2px solid var(--color-accent-blue);
+            box-shadow: 0 -10px 30px -15px rgba(0, 255, 255, 0.3);
+
+            background-image: url('https://img.freepik.com/premium-vector/space-cartoon-background-cute-design-landing_174187-25381.jpg'); /* Thay đổi đường dẫn đến ảnh của bạn */
+            background-size: cover; /* Đảm bảo ảnh phủ kín toàn bộ footer */
+            background-position: center; /* Căn giữa ảnh */
+            background-attachment: scroll; /* Ảnh cuộn cùng trang, dùng fixed nếu muốn hiệu ứng parallax */
+            background-repeat: no-repeat; /* Không lặp lại ảnh */
+            position: relative; /* Quan trọng để overlay hoạt động */
+            z-index: 1; 
+        }
+
+        /* Xóa bỏ hoàn toàn phần #stars-container và .star nếu không dùng */
+        /* Nếu giữ lại, nó sẽ bị ảnh nền che mất */
+        /* Hoặc bạn có thể xóa cả div <div id="stars-container"></div> trong HTML */
+        #stars-container {
+            display: none; /* Ẩn đi để không còn sao rơi */
+        }
+        /* Nếu bạn vẫn muốn có lớp phủ riêng biệt cho ảnh nền (ví dụ nếu không dùng rgba cho background-color) */
+        /* Bạn có thể thêm một pseudo-element như thế này: */
+        .site-footer::before {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background-color: rgba(0, 0, 0, 0.5); /* Màu đen trong suốt 50% */
+             z-index: -1; /* Đảm bảo lớp phủ nằm dưới nội dung */
+        }
+
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2; /* Đảm bảo nội dung footer nằm trên lớp phủ */
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h5 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px var(--color-accent-blue);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease, padding-left 0.3s ease;
+            position: relative;
+        }
+
+        .footer-links a:before {
+            content: '\f105'; /* Icon angle-right của Font Awesome */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 8px;
+            color: var(--color-accent-blue);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-accent-blue);
+            padding-left: 15px;
+        }
+        
+        .footer-links a:hover:before {
+            opacity: 1;
+        }
+
+        .footer-about p {
+            line-height: 1.8;
+            color: var(--color-text-muted);
+        }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+            border-radius: 5px;
+            background-color: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .newsletter-form input[type="email"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var( --color-text-light);
+            font-family: var(--font-heading);
+        }
+        .newsletter-form input[type="email"]::placeholder {
+            color: var(--color-text-muted);
+        }
+        .newsletter-form input[type="email"]:focus {
+            outline: none;
+        }
+
+        .newsletter-form button {
+            padding: 12px 18px;
+            border: none;
+            background-color: var(--color-accent-blue);
+            color: var(--color-dark-deep);
+            cursor: pointer;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            background-color: #fff;
+        }
+        
+        .cosmic-quote {
+            border-left: 3px solid var(--color-accent-blue);
+            padding-left: 20px;
+            font-style: italic;
+            color: var(--color-text-muted);
+        }
+        
+        .cosmic-quote p {
+            margin: 0 0 10px 0;
+        }
+        
+        .cosmic-quote footer {
+            font-style: normal;
+            color: var( --color-text-light);
+            font-weight: bold;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .copyright {
+            color: var(--color-text-muted);
+        }
+
+        .social-icons a {
+            color: var(--color-text-muted);
+            font-size: 1.8rem;
+            margin-left: 20px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--color-accent-blue);
+            transform: translateY(-3px);
+            text-shadow: 0 0 10px var(--color-accent-blue);
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .footer-column h5 {
+                margin-top: 30px;
+            }
+            .footer-links li {
+                display: inline-block;
+                margin: 0 10px 10px 0;
+            }
+            .footer-links ul {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .footer-links a:before {
+                display: none;
+            }
+            .footer-links a:hover {
+                padding-left: 0;
+            }
+            .newsletter-form {
+                width: 80%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            .social-icons {
+                margin-top: 20px;
+            }
+            .social-icons a {
+                margin: 0 10px;
+            }
+        }

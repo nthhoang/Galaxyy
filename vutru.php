@@ -251,35 +251,37 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/galaxy/load_noti.php';
 
          <section id="featured-highlights" class="featured-highlights-section py-5" style="background-color:#0a192f;">
             <div class="container">
-                <h2 class="section-title text-center mb-5 animate-on-scroll">Khám phá nổi bật</h2>
+                <h2 class="section-title text-center mb-5 animate-on-scroll text-white">Khám phá thêm</h2>
                 <div class="row">
                     <div class="col-md-4 mb-4 animate-on-scroll">
                         <div class="card h-100 shadow-sm custom-card">
-                            <img src="https://img.freepik.com/free-vector/planets-solar-system-infographic_1308-51094.jpg?semt=ais_hybrid&w=740" class="card-img-top" alt="Hệ Mặt Trời">
+                            <img src="./images-icon/vutru10.jpg" class="card-img-top" alt="Sự kiện vũ trụ">
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">Hệ Mặt Trời</h5>
-                                <p class="card-text">Du hành qua các hành tinh, mặt trăng và các thiên thể khác trong sân nhà vũ trụ của chúng ta.</p>
-                                <a href="solar-system.html" class="btn btn-primary mt-auto">Khám phá</a>
+                                <h5 class="card-title">Sự Kiện</h5>
+                                <p class="card-text">Khám phá những sự kiện thiên văn sắp tới và các hoạt động khoa học vũ trụ nổi bật.</p>
+                                <a href="sukien.php" class="btn btn-primary mt-auto">Xem sự kiện</a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4 animate-on-scroll">
-                        <div class="card h-100 shadow-sm custom-card">
-                            <img src="https://mega.com.vn/media/news/1706_hinh-nen-phi-hanh-gia133.jpg" class="card-img-top" alt="Vũ trụ">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">Vũ Trụ Bao La</h5>
-                                <p class="card-text">Tìm hiểu về các thiên hà, tinh vân, lỗ đen và những cấu trúc vĩ đại nhất của vũ trụ.</p>
-                                <a href="universe.html" class="btn btn-primary mt-auto">Tìm hiểu</a>
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="col-md-4 mb-4 animate-on-scroll">
                         <div class="card h-100 shadow-sm custom-card">
                             <img src="https://www.nasa.gov/wp-content/uploads/2015/08/jsc2015e032666_blog.jpg" class="card-img-top" alt="Tin tức vũ trụ">
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">Tin Tức Vũ Trụ</h5>
-                                <p class="card-text">Cập nhật những phát hiện, sự kiện và sứ mệnh không gian mới nhất từ khắp nơi trên thế giới.</p>
-                                <a href="news.html" class="btn btn-primary mt-auto">Xem tin tức</a>
+                                <h5 class="card-title">Tin Tức</h5>
+                                <p class="card-text">Cập nhật phát hiện, nghiên cứu và sứ mệnh không gian mới nhất từ khắp nơi.</p>
+                                <a href="tintuc.php" class="btn btn-primary mt-auto">Xem tin tức</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4 animate-on-scroll">
+                        <div class="card h-100 shadow-sm custom-card">
+                            <img src="./images-icon/comunity1.jpg" class="card-img-top" alt="Cộng đồng vũ trụ">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">Cộng Đồng</h5>
+                                <p class="card-text">Kết nối cùng những người yêu thích vũ trụ, chia sẻ kiến thức và trải nghiệm.</p>
+                                <a href="congdong.php" class="btn btn-primary mt-auto">Tham gia</a>
                             </div>
                         </div>
                     </div>
